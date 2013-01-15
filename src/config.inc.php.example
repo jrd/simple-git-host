@@ -1,0 +1,5 @@
+<?php
+$title = 'git.myhost.com';
+$githost = 'myhost.com';
+$gituser = 'git';
+$gitdir = '/home/git';

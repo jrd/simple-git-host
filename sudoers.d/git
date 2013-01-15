@@ -1,0 +1,2 @@
+# vim: syn=sudoers:
+WEB_USER ALL = (GIT_USER) NOPASSWD: GIT_DIR/gitrepo.sh

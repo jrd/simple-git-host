@@ -1,0 +1,54 @@
+a, a:link, a:visited {
+  display: inline-block;
+  padding: 2px 5px 2px 5px;
+  text-decoration: none;
+  color: blue;
+  background-color: #AAA;
+  border: 1px solid black
+}
+a:hover {
+  color: red;
+}
+h1 {
+  text-align: center;
+}
+textarea {
+  width: 800px;
+  height: 100px;
+}
+table {
+  border: 1px solid black;
+  border-collapse: collapse;
+  width: 100%;
+}
+table .name,
+table .key,
+table .address {
+  text-align: left;
+}
+table .member,
+table .actions {
+  text-align: center;
+}
+table th {
+  background-color: #DDD;
+  text-align: center !important;
+}
+table tr:hover {
+  background-color: #AAA;
+}
+#nav {
+  background-color: #EEE;
+  padding: 5px 0 5px 20px;
+}
+#nav p span {
+  font-weight: bold;
+}
+div.invite {
+  margin-top: 10px;
+  margin-left: 20px;
+  margin-bottom: 10px;
+}
+div.invite span {
+  font-weight: bold;
+}
