@@ -50,7 +50,12 @@ foreach ($files as $file) {
     if ($admin) {
       $actions .= "&nbsp;<a href=\"repo-del.php?repo=$proj\">Supprimer</a>";
     }
-    echo "        <tr><td class=\"name\" title=\"$desc\">$proj</td><td class=\"address\">$gituser@$githost:$gitdir/$file</td><td class=\"member\">$membre</td><td class=\"actions\">$actions</td></tr>\n";
+    echo "        <tr><td class=\"name\" title=\"$desc\">$proj</td><td class=\"address\">";
+    echo "<div class=\"rw\">$gituser@$githost:$gitdir/$file</div>";
+    if (file_exists("$gitdir/$file/git-daemon-export-ok")) {
+      echo "<div class=\"ro\">git://$githost/$file</div>";
+    }
+    echo "</td><td class=\"member\">$membre</td><td class=\"actions\">$actions</td></tr>\n";
   }
 }
 ?>

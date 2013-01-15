@@ -94,5 +94,12 @@ cat <<EOF > www/config.inc.php
 \$gitdir = '$GIT_DIR';
 EOF
 
-echo "Installation complete."
-echo "Please copy the www folder to your website folder."
+cat <<'EOF'
+
+** Installation complete. **"
+
+Please copy the www folder to your website folder.
+
+If you want to enable anonymous read-only on the repositories, run this:
+EOF
+echo "git daemon --listen=0.0.0.0 --reuseaddr --base-path=$GIT_DIR --user=$WEB_USER --detach $GIT_DIR"
