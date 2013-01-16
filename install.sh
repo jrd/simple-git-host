@@ -4,12 +4,13 @@ cd "$(dirname "$0")"
 
 usage() {
   cat <<EOF
-install.sh -h git_host -u git_user -d git_home_dir -t web_title -w web_user
+install.sh -h git_host -u git_user -d git_home_dir -t web_title -w web_user -g git_web_path
   git_host: hostname to connect to in ssh for git access
   git_user: user to connect to in ssh for git access
   git_home_dir: where is the home dir of the git user
   web_title: title of the web site
   web_user: user running web site, usually apache or www or nobody
+  git_web_path: if specified, indicate the path (relative to this site) to the git web cgi files
 EOF
 }
 GIT_HOST=''
@@ -17,7 +18,8 @@ GIT_USER=''
 GIT_HOME_DIR=''
 WEB_TITLE=''
 WEB_USER=''
-opts=$(getopt -n install.sh -o 'h:u:d:t:w:' -- "$@")
+GIT_WEB_PATH=''
+opts=$(getopt -n install.sh -o 'h:u:d:t:w:g:' -- "$@")
 if [ $? -ne 0 ]; then
   usage
   exit 1
@@ -43,6 +45,10 @@ while [ -n "$1" ] && [ "$1" != "--" ]; do
       ;;
     -w)
       WEB_USER="$2"
+      shift 2
+      ;;
+    -g)
+      GIT_WEB_PATH="$2"
       shift 2
       ;;
     *)
@@ -92,14 +98,34 @@ cat <<EOF > www/config.inc.php
 \$githost = '$GIT_HOST';
 \$gituser = '$GIT_USER';
 \$gitdir = '$GIT_DIR';
+\$gitwebpath = '$GIT_WEB_PATH';
 EOF
 
-cat <<'EOF'
+cat <<EOF
 
 ** Installation complete. **"
 
 Please copy the www folder to your website folder.
 
 If you want to enable anonymous read-only on the repositories, run this:
+  \$ git daemon --listen=0.0.0.0 --reuseaddr --base-path=$GIT_DIR --user=$WEB_USER --detach $GIT_DIR
+
+If you want to install gitweb, run this:
+  \$ wget 'http://git.kernel.org/?p=git/git.git;a=snapshot;h=HEAD;sf=tgz' -O gitweb.tar.gz
+  \$ tar xf gitweb.tar.gz
+  \$ cd git-HEAD-*/gitweb
+  \$ su
+  # make prefix=/usr GITWEB_PROJECTROOT=$GIT_DIR GITWEB_PROJECT_MAXDEPTH=50 GITWEB_EXPORT_OK=git-daemon-export-ok GITWEB_HOME_LINK_STR=/ GITWEB_SITENAME="$WEB_TITLE" gitwebdir=/var/www/$GIT_WEB_PATH install
+for example. Of course you need to adjust the path of the gitwebdir to where you install gitweb and this site.
+Here is the configuration to add to your virtual host apache file:
+  <Directory "/var/www/$GIT_WEB_PATH">
+    Options ExecCGI +FollowSymlinks +SymLinksIfOwnerMatch
+    AllowOverride All
+    Order allow,deny
+    Allow from all
+    AddHandler cgi-script cgi
+    DirectoryIndex gitweb.cgi
+  </Directory>
+
+Have fun ;-)
 EOF
-echo "git daemon --listen=0.0.0.0 --reuseaddr --base-path=$GIT_DIR --user=$WEB_USER --detach $GIT_DIR"

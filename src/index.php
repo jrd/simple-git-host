@@ -47,12 +47,16 @@ foreach ($files as $file) {
       }
     }
     $actions = "<a href=\"repo-users.php?repo=$proj\">Utilisateurs</a>&nbsp;<a href=\"repo-histo.php?repo=$proj\">Historique</a>";
+    $exportok = file_exists("$gitdir/$file/git-daemon-export-ok");
+    if (!empty($gitwebpath) && $exportok) {
+      $actions .= "&nbsp;<a href=\"$gitwebpath/$file\">Explorer</a>";
+    }
     if ($admin) {
       $actions .= "&nbsp;<a href=\"repo-del.php?repo=$proj\">Supprimer</a>";
     }
     echo "        <tr><td class=\"name\" title=\"$desc\">$proj</td><td class=\"address\">";
     echo "<div class=\"rw\">$gituser@$githost:$gitdir/$file</div>";
-    if (file_exists("$gitdir/$file/git-daemon-export-ok")) {
+    if ($exportok) {
       echo "<div class=\"ro\">git://$githost/$file</div>";
     }
     echo "</td><td class=\"member\">$membre</td><td class=\"actions\">$actions</td></tr>\n";
