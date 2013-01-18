@@ -49,7 +49,7 @@ foreach ($files as $file) {
     $actions = "<a href=\"repo-users.php?repo=$proj\">Utilisateurs</a>&nbsp;<a href=\"repo-histo.php?repo=$proj\">Historique</a>";
     $exportok = file_exists("$gitdir/$file/git-daemon-export-ok");
     if (!empty($gitwebpath) && $exportok) {
-      $actions .= "&nbsp;<a href=\"$gitwebpath/$file\">Explorer</a>";
+      $actions .= "&nbsp;<a href=\"$gitwebpath/?p=$file\">Explorer</a>";
     }
     if ($admin) {
       $actions .= "&nbsp;<a href=\"repo-del.php?repo=$proj\">Supprimer</a>";
