@@ -16,8 +16,9 @@ if (isset($_POST['submit_user_add'])) {
 ?>
 <html>
   <head>
-  <title><?php echo "$title - Administration des utilisateurs"; ?></title>
+    <title><?php echo "$title - Administration des utilisateurs"; ?></title>
     <link href="style.css" rel="stylesheet" type="text/css" />
+    <link rel="shortcut icon" href="favicon.png" type="image/png"/>
   </head>
   <body>
     <h1><?php echo "$title - Administration des utilisateurs"; ?></h1>
@@ -40,10 +41,13 @@ foreach ($users as $user) {
     </div>
     <hr/>
     <div class="error"><?php echo $errorMsg; ?></div>
-    <form id="repo-add-user" action="" method="POST" autocomplete="off">
-      <label for="username">Login : </label><input type="text" name="username" id="username" value=""/>
-      <label for="password">MdP : </label><input type="password" name="password" id="password" value=""/>
-      <input type="submit" name="submit_user_add" value="Ajouter l'utilisateur au dépôt"/>
+    <form id="add-user" action="" method="POST" autocomplete="off">
+      <fieldset>
+        <legend>Ajouter un utilisateur</legend>
+        <label for="username">Login : </label><input type="text" name="username" id="username" value=""/>
+        <label for="password">MdP : </label><input type="password" name="password" id="password" value=""/>
+        <input type="submit" name="submit_user_add" value="Ajouter l'utilisateur au dépôt"/>
+      </fieldset>
     </form>
   </body>
 </html>

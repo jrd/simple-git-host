@@ -19,6 +19,7 @@ if ($admin && isset($_POST['submit_user_add'])) {
   <head>
     <title><?php echo "$title - $repo"; ?></title>
     <link href="style.css" rel="stylesheet" type="text/css" />
+    <link rel="shortcut icon" href="favicon.png" type="image/png"/>
   </head>
   <body>
     <h1><?php echo "$title - $repo"; ?></h1>
@@ -46,17 +47,20 @@ foreach ($users as $user) {
     <hr/>
     <div class="error"><?php echo $errorMsg; ?></div>
     <form id="repo-add-user" action="" method="POST">
-      <label for="new-repo">Nouveau membre :</label>&nbsp;
-      <select name="username">
+      <fieldset>
+        <legend>Ajouter un utilisateur au dépôt</legend>
+        <label for="new-repo">Nouveau membre :</label>&nbsp;
+        <select name="username">
 <?php
 $users = gitrepoinfo('list-users');
 foreach ($users as $user) {
   $user = htmlspecialchars($user);
-  echo "        <option value=\"$user\">$user</option>\n";
+  echo "          <option value=\"$user\">$user</option>\n";
 }
 ?>
-      </select>
-      <input type="submit" name="submit_user_add" value="Ajouter l'utilisateur au dépôt"/>
+        </select>
+        <input type="submit" name="submit_user_add" value="Ajouter l'utilisateur au dépôt"/>
+      </fieldset>
     </form>
 <?php } ?>
   </body>

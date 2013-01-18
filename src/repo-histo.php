@@ -11,6 +11,7 @@ if (empty($_GET['repo'])) {
   <head>
     <title><?php echo "$title - $repo"; ?></title>
     <link href="style.css" rel="stylesheet" type="text/css" />
+    <link rel="shortcut icon" href="favicon.png" type="image/png"/>
   </head>
   <body>
     <h1><?php echo "$title - $repo"; ?></h1>

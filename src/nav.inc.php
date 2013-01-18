@@ -7,9 +7,12 @@ if ($logged) {
   echo "<div class=\"error\">$errorMsg</div>\n";
   echo <<<EOF
 <form action="" method="POST">
-  <label for="username">Login : </label><input type="text" name="username" id="username" value=""/>
-  <label for="password">MdP : </label><input type="password" name="password" id="password" value=""/>
-  <input type="submit" name="submit_auth" value="Ok"/>
+  <fieldset>
+    <legend>Identification</legend>
+    <label for="username">Login : </label><input type="text" name="username" id="username" value=""/>
+    <label for="password">MdP : </label><input type="password" name="password" id="password" value=""/>
+    <input type="submit" name="submit_auth" value="Ok"/>
+  </fieldset>
 </form>
 EOF;
 }

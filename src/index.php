@@ -6,14 +6,15 @@ if ($admin && isset($_POST['submit_repo'])) {
   $fDesc = $_POST['new-desc'];
   $res = gitrepoinfo('create', $fRepo, $fDesc);
   if ($res === false) {
-    $errorMsg = "La dépôt n'a pas pu être ajouté.";
+    $errorMsg = "Le dépôt n'a pas pu être ajouté.";
   }
 }
 ?>
 <html>
   <head>
-  <title><?php echo $title; ?></title>
+    <title><?php echo $title; ?></title>
     <link href="style.css" rel="stylesheet" type="text/css" />
+    <link rel="shortcut icon" href="favicon.png" type="image/png"/>
   </head>
   <body>
     <h1><?php echo $title; ?></h1>
@@ -38,7 +39,7 @@ foreach ($files as $file) {
       $desc = "$proj";
     }
     $users = gitrepoinfo('show-users', $proj);
-    $membre = count($users) > 0 ? ' ? ' : ' — ';
+    $membre = count($users) > 0 ? '<span title="Veuillez vous identifier"> ? </span>' : '<span title="Aucun utilisateur"> — </span>';
     if ($logged && count($users) > 0) {
       if (in_array($_SESSION['username'], $users)) {
         $membre = "Oui";
@@ -69,9 +70,12 @@ foreach ($files as $file) {
     <hr/>
     <div class="error"><?php echo $errorMsg; ?></div>
     <form id="repo-add" action="" method="POST">
-      <label for="new-repo">Nom du nouveau dépôt :</label>&nbsp;<input type="text" name="new-repo" id="new-repo" value=""/><br/>
-      <label for="new-desc">Description :</label>&nbsp;<input type="text" name="new-desc" id="new-desc" value=""/><br/>
-      <input type="submit" name="submit_repo" value="Ajouter le dépôt"/>
+      <fieldset>
+        <legend>Ajouter un dépôt</legend>
+        <label for="new-repo">Nom du nouveau dépôt :</label>&nbsp;<input type="text" name="new-repo" id="new-repo" value=""/><br/>
+        <label for="new-desc">Description :</label>&nbsp;<input type="text" name="new-desc" id="new-desc" value=""/><br/>
+        <input type="submit" name="submit_repo" value="Ajouter le dépôt"/>
+      </fieldset>
     </form>
     <hr/>
     <a href="admin-users.php">Gestion des utilisateurs</a>

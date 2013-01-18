@@ -27,6 +27,7 @@ if (isset($_POST['submit_pwd'])) {
   <head>
     <title><?php echo "$title - $username"; ?></title>
     <link href="style.css" rel="stylesheet" type="text/css" />
+    <link rel="shortcut icon" href="favicon.png" type="image/png"/>
   </head>
   <body>
     <h1><?php echo "$title - $username"; ?></h1>
@@ -52,16 +53,22 @@ foreach ($keys as $key) {
     <hr/>
     <div class="error"><?php echo $errorMsgKey; ?></div>
     <form id="add-key" action="" method="POST">
-      <label for="new-key">Nouvelle clé SSH :</label><br/>
-      <textarea name="new-key" id="new-key"></textarea><br/>
-      <input type="submit" name="submit_key" value="Ajouter"/>
+      <fieldset>
+        <legend>Ajouter une clé SSH</legend>
+        <label for="new-key">Nouvelle clé SSH :</label><br/>
+        <textarea name="new-key" id="new-key"></textarea><br/>
+        <input type="submit" name="submit_key" value="Ajouter"/>
+      </fieldset>
     </form>
     <hr/>
     <div class="error"><?php echo $errorMsgPwd; ?></div>
     <form id="change-pwd" action="" method="POST" autocomplete="off">
-      <label for="new-pwd">Nouveau mot de passe :</label><br/>
-      <input type="password" name="new-pwd" id="new-pwd" value=""/><br/>
-      <input type="submit" name="submit_pwd" value="Changer le mot de passe"/>
+      <fieldset>
+        <legend>Changer le mot de passe</legend>
+        <label for="new-pwd">Nouveau mot de passe :</label><br/>
+        <input type="password" name="new-pwd" id="new-pwd" value=""/><br/>
+        <input type="submit" name="submit_pwd" value="Changer le mot de passe"/>
+      </fieldset>
     </form>
   </body>
 </html>

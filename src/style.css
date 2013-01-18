@@ -1,13 +1,13 @@
 a, a:link, a:visited {
   display: inline-block;
-  padding: 2px 5px 2px 5px;
   text-decoration: none;
-  color: blue;
-  background-color: #AAA;
-  border: 1px solid black
-}
-a:hover {
-  color: red;
+  appearance: button;
+  -moz-appearance: button;
+  -webkit-appearance: button;
+  -o-appearance: button;
+  font: menu;
+  color: ButtonText;
+  padding: 2px 8px;
 }
 h1 {
   text-align: center;
@@ -31,14 +31,14 @@ table .actions {
   text-align: center;
 }
 table th {
-  background-color: #DDD;
+  background-color: #EEE;
   text-align: center !important;
+  height: 30px;
 }
 table tr:hover {
-  background-color: #AAA;
+  background-color: #CCC;
 }
 #nav {
-  background-color: #EEE;
   padding: 5px 0 5px 20px;
 }
 #nav p span {
@@ -51,6 +51,11 @@ div.invite {
 }
 div.invite span {
   font-weight: bold;
+}
+div.error {
+  padding-left: 10px;
+  color: red;
+  font-style: italic;
 }
 div.rw {
   color: black;
