@@ -32,6 +32,13 @@ Action is one of:
    Show a graphical representation of the repository.
  - fetch Name Url
    Fetch all remotes if the Url is in Name.git/fetchurls file
+ - export Name on|off
+   Export (or not) the following repo as read-only for git-daemon
+ - sync Name from|to url
+   Synchronize from or to the following URL.
+   Sync to is done automatically at each commit. Be careful to add git user ssl keys to remote repo.
+   Sync from is done automatically after a POST request to post-update.php script with a json variable named 'payload' containing:
+     {'repository': {'name', 'url'}
 EOF
 }
 
@@ -300,6 +307,54 @@ fetch() {
   fi
 }
 
+exportRepo() {
+  NAME="$1"
+  DOEXPORT="$2"
+  check_repo "$NAME"
+  if [ "$DOEXPORT" = "on" ]; then
+    touch "$NAME".git/git-daemon-export-ok
+  else
+    rm -f "$NAME".git/git-daemon-export-ok
+  fi
+}
+
+syncRepo() {
+  NAME="$1"
+  DIR="$2"
+  URL="$3"
+  check_repo "$NAME"
+  if [ "$DIR" = "to" ]; then
+    syncToRepo "$NAME" "$URL"
+  elif [ "$DIR" = "from" ]; then
+    syncFromRepo "$NAME" "$URL"
+  else
+    echo "$DIR is not a correct sync direction. 'to' or 'from' expected." >&2
+    exit 2
+  fi
+}
+
+syncToRepo() {
+  NAME="$1"
+  URL="$2"
+  check_repo "$NAME"
+  HOST=$(basename $(dirname $(echo "$URL" | sed 's,@,/,g;')))
+  (
+    cd "$NAME".git
+    git remote add --mirror $HOST "$URL"
+  )
+  if [ ! -f "$NAME".git/hooks/post-update ]; then
+    echo '#!/bin/sh' > "$NAME".git/hooks/post-update
+  fi
+  echo "git push --quiet $HOST &" >> "$NAME".git/hooks/post-update
+}
+
+syncFromRepo() {
+  NAME="$1"
+  URL="$2"
+  check_repo "$NAME"
+  echo "$URL" >> "$NAME".git/fetchremotes
+}
+
 ACTION=''
 NAME=''
 REPO=''
@@ -310,6 +365,8 @@ OPTION=''
 OPT_VAL=''
 KEY=''
 URL=''
+EXPORTREPO=''
+SYNCDIRECTION=''
 while [ -n "$1" ]; do
   case "$1" in
     -h|--help)
@@ -318,7 +375,7 @@ while [ -n "$1" ]; do
       ;;
     *)
       if [ -z "$ACTION" ]; then
-        if echo "$1" | grep -q '^\(create\|destroy\|get\|set\|list-users\|create-user\|change-user\|show-pwd\|destroy-user\|show-users\|add-user\|del-user\|list-keys\|add-key\|del-key\|graph\|fetch\)$'; then
+        if echo "$1" | grep -q '^\(create\|destroy\|get\|set\|list-users\|create-user\|change-user\|show-pwd\|destroy-user\|show-users\|add-user\|del-user\|list-keys\|add-key\|del-key\|graph\|fetch\|export\|sync\)$'; then
           ACTION="$1"
           shift
         else
@@ -407,6 +464,25 @@ while [ -n "$1" ]; do
             exit 1
           elif [ "$ACTION" = "fetch" ]; then
             if [ -z "$URL" ]; then
+              URL="$1"
+              shift
+            else
+              echo "Unrecognized parameter ($1)" >&2
+              exit 1
+            fi
+          elif [ "$ACTION" = "export" ]; then
+            if [ -z "$EXPORTREPO" ]; then
+              EXPORTREPO="$1"
+              shift
+            else
+              echo "Unrecognized parameter ($1)" >&2
+              exit 1
+            fi
+          elif [ "$ACTION" = "sync" ]; then
+            if [ -z "$SYNCDIRECTION" ]; then
+              SYNCDIRECTION="$1"
+              shift
+            elif [ -z "$URL" ]; then
               URL="$1"
               shift
             else
@@ -506,5 +582,15 @@ case "$ACTION" in
     REPO="$NAME"
     checkparams REPO URL
     fetch "$REPO" "$URL"
+    ;;
+  export)
+    REPO="$NAME"
+    checkparams REPO EXPORTREPO
+    exportRepo "$REPO" "$EXPORTREPO"
+    ;;
+  sync)
+    REPO="$NAME"
+    checkparams REPO SYNCDIRECTION URL
+    syncRepo "$REPO" "$SYNCDIRECTION" "$URL"
     ;;
 esac
