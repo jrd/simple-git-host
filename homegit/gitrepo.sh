@@ -30,6 +30,8 @@ Action is one of:
    Position starts from 1 as listed by list-keys
  - graph Name
    Show a graphical representation of the repository.
+ - fetch Name Url
+   Fetch all remotes if the Url is in Name.git/fetchurls file
 EOF
 }
 
@@ -286,6 +288,18 @@ graph() {
   )
 }
 
+fetch() {
+  NAME="$1"
+  URL="$2"
+  check_repo "$NAME"
+  if [ -f "$NAME".git/fetchremotes ] && grep -q -F "$URL" "$NAME".git/fetchremotes; then
+    (
+      cd "$NAME".git
+      git fetch --all
+    )
+  fi
+}
+
 ACTION=''
 NAME=''
 REPO=''
@@ -295,6 +309,7 @@ DESC=''
 OPTION=''
 OPT_VAL=''
 KEY=''
+URL=''
 while [ -n "$1" ]; do
   case "$1" in
     -h|--help)
@@ -303,7 +318,7 @@ while [ -n "$1" ]; do
       ;;
     *)
       if [ -z "$ACTION" ]; then
-        if echo "$1" | grep -q '^\(create\|destroy\|get\|set\|list-users\|create-user\|change-user\|show-pwd\|destroy-user\|show-users\|add-user\|del-user\|list-keys\|add-key\|del-key\|graph\)$'; then
+        if echo "$1" | grep -q '^\(create\|destroy\|get\|set\|list-users\|create-user\|change-user\|show-pwd\|destroy-user\|show-users\|add-user\|del-user\|list-keys\|add-key\|del-key\|graph\|fetch\)$'; then
           ACTION="$1"
           shift
         else
@@ -390,6 +405,14 @@ while [ -n "$1" ]; do
           elif [ "$ACTION" = "graph" ]; then
             echo "Unrecognized parameter ($1)" >&2
             exit 1
+          elif [ "$ACTION" = "fetch" ]; then
+            if [ -z "$URL" ]; then
+              URL="$1"
+              shift
+            else
+              echo "Unrecognized parameter ($1)" >&2
+              exit 1
+            fi
           fi
         fi
       fi
@@ -478,5 +501,10 @@ case "$ACTION" in
     REPO="$NAME"
     checkparams REPO
     graph "$REPO"
+    ;;
+  fetch)
+    REPO="$NAME"
+    checkparams REPO URL
+    fetch "$REPO" "$URL"
     ;;
 esac
