@@ -13,16 +13,9 @@ if (isset($_POST['submit_user_add'])) {
     $errorMsg = "L'utilisateur n'a pas pu être ajouté.";
   }
 }
+$pageTitle = "$title - Administration des utilisateurs";
+require('header.inc.php');
 ?>
-<html>
-  <head>
-    <title><?php echo "$title - Administration des utilisateurs"; ?></title>
-    <link href="style.css" rel="stylesheet" type="text/css" />
-    <link rel="shortcut icon" href="favicon.png" type="image/png"/>
-  </head>
-  <body>
-    <h1><?php echo "$title - Administration des utilisateurs"; ?></h1>
-    <div id="nav"><a href="index.php">Index</a></div>
     <div id="users">
       <div class="invite">Les utilisateurs :</div>
       <table>
@@ -33,13 +26,12 @@ if (isset($_POST['submit_user_add'])) {
 <?php
 $users = gitrepoinfo('list-users');
 foreach ($users as $user) {
-  $actions = "<a href=\"user-del.php?user=$user\">Supprimer</a>";
+  $actions = "<a class=\"delete\" href=\"user-del.php?user=$user\" onclick=\"return confirm('Êtes vous sûr de vouloir supprimer l\'utilisateur \'$user\' ?');\">Supprimer</a>";
   echo "        <tr><td class=\"name\">$user</td><td class=\"actions\">$actions</td></tr>\n";
 }
 ?>
       </table>
     </div>
-    <hr/>
     <div class="error"><?php echo $errorMsg; ?></div>
     <form id="add-user" action="" method="POST" autocomplete="off">
       <fieldset>
@@ -49,5 +41,4 @@ foreach ($users as $user) {
         <input type="submit" name="submit_user_add" value="Ajouter l'utilisateur au dépôt"/>
       </fieldset>
     </form>
-  </body>
-</html>
+<?php require('footer.inc.php'); ?>

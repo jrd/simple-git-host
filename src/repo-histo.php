@@ -6,16 +6,9 @@ if (empty($_GET['repo'])) {
 } else {
   $repo = $_GET['repo'];
 }
+$pageTitle = "$title - $repo";
+require('header.inc.php');
 ?>
-<html>
-  <head>
-    <title><?php echo "$title - $repo"; ?></title>
-    <link href="style.css" rel="stylesheet" type="text/css" />
-    <link rel="shortcut icon" href="favicon.png" type="image/png"/>
-  </head>
-  <body>
-    <h1><?php echo "$title - $repo"; ?></h1>
-    <div id="nav"><a href="index.php">Index</a></div>
     <div id="users">
       <div class="invite">Le graphe d'historique de <span><?php echo $repo; ?></span> :</div>
       <pre>
@@ -29,5 +22,4 @@ if (empty($_GET['repo'])) {
 ?>
       </pre>
     </div>
-  </body>
-</html>
+<?php require('footer.inc.php'); ?>

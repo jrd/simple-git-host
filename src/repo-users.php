@@ -14,16 +14,9 @@ if ($admin && isset($_POST['submit_user_add'])) {
     $errorMsg = "L'utilisateur n'a pas pu être ajouté.";
   }
 }
+$pageTitle = "$title - Membres de $repo";
+require('header.inc.php');
 ?>
-<html>
-  <head>
-    <title><?php echo "$title - $repo"; ?></title>
-    <link href="style.css" rel="stylesheet" type="text/css" />
-    <link rel="shortcut icon" href="favicon.png" type="image/png"/>
-  </head>
-  <body>
-    <h1><?php echo "$title - $repo"; ?></h1>
-    <div id="nav"><a href="index.php">Index</a></div>
     <div id="users">
       <div class="invite">Les membres de <span><?php echo $repo; ?></span> :</div>
       <table>
@@ -44,12 +37,11 @@ foreach ($users as $user) {
       </table>
     </div>
 <?php if ($admin) { ?>
-    <hr/>
     <div class="error"><?php echo $errorMsg; ?></div>
     <form id="repo-add-user" action="" method="POST">
       <fieldset>
         <legend>Ajouter un utilisateur au dépôt</legend>
-        <label for="new-repo">Nouveau membre :</label>&nbsp;
+        <label for="username">Nouveau membre :</label>&nbsp;
         <select name="username">
 <?php
 $users = gitrepoinfo('list-users');
@@ -63,5 +55,4 @@ foreach ($users as $user) {
       </fieldset>
     </form>
 <?php } ?>
-  </body>
-</html>
+<?php require('footer.inc.php'); ?>

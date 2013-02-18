@@ -8,17 +8,13 @@ if ($admin && isset($_POST['submit_repo'])) {
   if ($res === false) {
     $errorMsg = "Le dépôt n'a pas pu être ajouté.";
   }
+  if (isset($_POST['new-export']) && $_POST['new-export'] == 'on') {
+    gitrepoinfo('export', $fRepo, 'on');
+  }
 }
+$pageTitle = $title;
+require('header.inc.php');
 ?>
-<html>
-  <head>
-    <title><?php echo $title; ?></title>
-    <link href="style.css" rel="stylesheet" type="text/css" />
-    <link rel="shortcut icon" href="favicon.png" type="image/png"/>
-  </head>
-  <body>
-    <h1><?php echo $title; ?></h1>
-<?php require('nav.inc.php'); ?>
     <div id="repos">
       <div class="invite">Les dépôts Git :</div>
       <table>
@@ -35,8 +31,8 @@ foreach ($files as $file) {
   if (is_dir("$gitdir/$file") && preg_match('/\.git$/', $file)) {
     $proj = preg_replace('/\.git$/', '', $file);
     $desc = htmlspecialchars(file_get_contents("$gitdir/$file/description"));
-    if (preg_match('/^Unnamed repository;/', $desc)) {
-      $desc = "$proj";
+    if (empty($desc) || preg_match('/^Unnamed repository;/', $desc)) {
+      $desc = $proj;
     }
     $users = gitrepoinfo('show-users', $proj);
     $membre = count($users) > 0 ? '<span title="Veuillez vous identifier"> ? </span>' : '<span title="Aucun utilisateur"> — </span>';
@@ -48,14 +44,16 @@ foreach ($files as $file) {
       }
     }
     $actions = "<a href=\"repo-users.php?repo=$proj\">Utilisateurs</a>&nbsp;<a href=\"repo-histo.php?repo=$proj\">Historique</a>";
+    if ($admin) {
+      $actions .= "&nbsp;<a class=\"edit\" href=\"repo-edit.php?repo=$proj\">Éditer</a>";
+      $actions .= "&nbsp;<a class=\"delete\" href=\"repo-del.php?repo=$proj\" onclick=\"return confirm('Êtes vous sûr de vouloir supprimer le dépôt \'$proj\' ?');\">Supprimer</a>";
+    }
+    $name = $proj;
     $exportok = file_exists("$gitdir/$file/git-daemon-export-ok");
     if (!empty($gitwebpath) && $exportok) {
-      $actions .= "&nbsp;<a href=\"$gitwebpath/?p=$file\">Explorer</a>";
+      $name .= "&nbsp;<a href=\"$gitwebpath/?p=$file\">⇒</a>";
     }
-    if ($admin) {
-      $actions .= "&nbsp;<a href=\"repo-del.php?repo=$proj\">Supprimer</a>";
-    }
-    echo "        <tr><td class=\"name\" title=\"$desc\">$proj</td><td class=\"address\">";
+    echo "        <tr><td class=\"name\" title=\"$desc\">$name</td><td class=\"address\">";
     echo "<div class=\"rw\">$gituser@$githost:$gitdir/$file</div>";
     if ($exportok) {
       echo "<div class=\"ro\">git://$githost/$file</div>";
@@ -67,18 +65,26 @@ foreach ($files as $file) {
       </table>
     </div>
 <?php if ($admin) { ?>
-    <hr/>
     <div class="error"><?php echo $errorMsg; ?></div>
     <form id="repo-add" action="" method="POST">
       <fieldset>
         <legend>Ajouter un dépôt</legend>
-        <label for="new-repo">Nom du nouveau dépôt :</label>&nbsp;<input type="text" name="new-repo" id="new-repo" value=""/><br/>
-        <label for="new-desc">Description :</label>&nbsp;<input type="text" name="new-desc" id="new-desc" value=""/><br/>
-        <input type="submit" name="submit_repo" value="Ajouter le dépôt"/>
+        <table>
+          <tr>
+            <td>
+              <label for="new-repo">Nom du nouveau dépôt :</label>&nbsp;<input type="text" name="new-repo" id="new-repo" value=""/>
+              <br/><label for="new-desc">Description :</label>&nbsp;<input type="text" name="new-desc" id="new-desc" value=""/>
+              <?php if (!empty($gitwebpath)) { ?>
+              <br/><label for="new-export">Anonymous read-only access :</label>&nbsp;<input type="checkbox" name="new-export" id="new-export" value="on"/>
+              <?php } ?>
+            </td>
+            <td>
+              <input type="submit" name="submit_repo" value="Ajouter le dépôt"/>
+            </td>
+          </tr>
+        </table>
       </fieldset>
     </form>
-    <hr/>
     <a href="admin-users.php">Gestion des utilisateurs</a>
 <?php } ?>
-  </body>
-</html>
+<?php require('footer.inc.php'); ?>

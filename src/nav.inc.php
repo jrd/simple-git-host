@@ -1,4 +1,5 @@
 <div id="nav">
+  <p class="breadcrumbs"><a href="index.php">Index</a></p>
 <?php
 if ($logged) {
   echo "<p>Vous êtes connecté en tant que <span>" . $_SESSION['username'] . "</span><br/>\n";

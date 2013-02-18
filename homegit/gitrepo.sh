@@ -39,6 +39,10 @@ Action is one of:
    Sync to is done automatically at each commit. Be careful to add git user ssl keys to remote repo.
    Sync from is done automatically after a POST request to post-update.php script with a json variable named 'payload' containing:
      {'repository': {'name', 'url'}
+ - unsync Name from|to url
+   remove sync previously set by 'sync' command.
+ - listsync Name from|to
+   list the url that are synchronized from or to, as defined by 'sync' command.
 EOF
 }
 
@@ -83,7 +87,9 @@ create_repo() {
     cd "$REPO".git
     git --bare init
     git config core.sharedRepository 1
-    [ -n "$DESC" ] && echo "$DESC" > description
+    if [ -n "$DESC" ]; then
+      echo "$DESC" > description
+    fi
   )
 }
 
@@ -129,7 +135,11 @@ set_option() {
   else
     (
       cd "$REPO".git
-      git --bare config "$OPTION" "$OPT_VAL"
+      if [ -n "$OPT_VAL" ]; then
+        git --bare config "$OPTION" "$OPT_VAL"
+      else
+        git --bare config --unset "$OPTION"
+      fi
     )
   fi
 }
@@ -302,7 +312,7 @@ fetch() {
   if [ -f "$NAME".git/fetchremotes ] && grep -q -F "$URL" "$NAME".git/fetchremotes; then
     (
       cd "$NAME".git
-      git fetch --all
+      git fetch "$URL"
     )
   fi
 }
@@ -337,15 +347,25 @@ syncToRepo() {
   NAME="$1"
   URL="$2"
   check_repo "$NAME"
-  HOST=$(basename $(dirname $(echo "$URL" | sed 's,@,/,g;')))
+  HOST=$(echo -n "$URL"|md5sum|cut -d' ' -f1)
   (
     cd "$NAME".git
     git remote add --mirror $HOST "$URL"
   )
   if [ ! -f "$NAME".git/hooks/post-update ]; then
-    echo '#!/bin/sh' > "$NAME".git/hooks/post-update
+    cat <<'EOF' > "$NAME".git/hooks/post-update
+#!/bin/sh
+if [ -d hooks/.post-update.d ]; then
+  for f in hooks/.post-update.d/*; do 
+    [ -x "$f" ] && ./"$f"
+  done
+fi
+EOF
+    chmod +x "$NAME".git/hooks/post-update
+    mkdir -p "$NAME".git/hooks/.post-update.d
   fi
-  echo "git push --quiet $HOST &" >> "$NAME".git/hooks/post-update
+  echo "git push --quiet $HOST &" > "$NAME".git/hooks/.post-update.d/$HOST
+  chmod +x "$NAME".git/hooks/.post-update.d/$HOST
 }
 
 syncFromRepo() {
@@ -353,6 +373,65 @@ syncFromRepo() {
   URL="$2"
   check_repo "$NAME"
   echo "$URL" >> "$NAME".git/fetchremotes
+}
+
+unsyncRepo() {
+  NAME="$1"
+  DIR="$2"
+  URL="$3"
+  check_repo "$NAME"
+  if [ "$DIR" = "to" ]; then
+    unsyncToRepo "$NAME" "$URL"
+  elif [ "$DIR" = "from" ]; then
+    unsyncFromRepo "$NAME" "$URL"
+  else
+    echo "$DIR is not a correct sync direction. 'to' or 'from' expected." >&2
+    exit 2
+  fi
+}
+
+unsyncToRepo() {
+  NAME="$1"
+  URL="$2"
+  check_repo "$NAME"
+  HOST=$(echo -n "$URL"|md5sum|cut -d' ' -f1)
+  (
+    cd "$NAME".git
+    git remote rm $HOST
+  )
+  [ -f "$NAME".git/hooks/.post-update.d/$HOST ] && rm "$NAME".git/hooks/.post-update.d/$HOST
+  true
+}
+
+unsyncFromRepo() {
+  NAME="$1"
+  URL="$2"
+  check_repo "$NAME"
+  [ -f "$NAME".git/fetchremotes ] && sed -i -n "\,$URL,d; p" "$NAME".git/fetchremotes
+  true
+}
+
+listSyncRepo() {
+  NAME="$1"
+  DIR="$2"
+  check_repo "$NAME"
+  if [ "$DIR" = "to" ]; then
+    (
+      cd "$NAME".git
+      for r in $(git remote); do
+        git config remote.$r.url
+      done
+    )
+  elif [ "$DIR" = "from" ]; then
+    if [ -f "$NAME".git/fetchremotes ]; then
+      cat "$NAME".git/fetchremotes
+    else
+      true
+    fi
+  else
+    echo "$DIR is not a correct sync direction. 'to' or 'from' expected." >&2
+    exit 2
+  fi
 }
 
 ACTION=''
@@ -375,7 +454,7 @@ while [ -n "$1" ]; do
       ;;
     *)
       if [ -z "$ACTION" ]; then
-        if echo "$1" | grep -q '^\(create\|destroy\|get\|set\|list-users\|create-user\|change-user\|show-pwd\|destroy-user\|show-users\|add-user\|del-user\|list-keys\|add-key\|del-key\|graph\|fetch\|export\|sync\)$'; then
+        if echo "$1" | grep -q '^\(create\|destroy\|get\|set\|list-users\|create-user\|change-user\|show-pwd\|destroy-user\|show-users\|add-user\|del-user\|list-keys\|add-key\|del-key\|graph\|fetch\|export\|sync\|unsync\|listsync\)$'; then
           ACTION="$1"
           shift
         else
@@ -478,12 +557,20 @@ while [ -n "$1" ]; do
               echo "Unrecognized parameter ($1)" >&2
               exit 1
             fi
-          elif [ "$ACTION" = "sync" ]; then
+          elif [ "$ACTION" = "sync" ] || [ "$ACTION" = "unsync" ]; then
             if [ -z "$SYNCDIRECTION" ]; then
               SYNCDIRECTION="$1"
               shift
             elif [ -z "$URL" ]; then
               URL="$1"
+              shift
+            else
+              echo "Unrecognized parameter ($1)" >&2
+              exit 1
+            fi
+          elif [ "$ACTION" = "listsync" ]; then
+            if [ -z "$SYNCDIRECTION" ]; then
+              SYNCDIRECTION="$1"
               shift
             else
               echo "Unrecognized parameter ($1)" >&2
@@ -517,7 +604,7 @@ case "$ACTION" in
     ;;
   set)
     REPO="$NAME"
-    checkparams REPO OPTION OPT_VAL
+    checkparams REPO OPTION
     set_option "$REPO" "$OPTION" "$OPT_VAL"
     ;;
   list-users)
@@ -592,5 +679,15 @@ case "$ACTION" in
     REPO="$NAME"
     checkparams REPO SYNCDIRECTION URL
     syncRepo "$REPO" "$SYNCDIRECTION" "$URL"
+    ;;
+  unsync)
+    REPO="$NAME"
+    checkparams REPO SYNCDIRECTION URL
+    unsyncRepo "$REPO" "$SYNCDIRECTION" "$URL"
+    ;;
+  listsync)
+    REPO="$NAME"
+    checkparams REPO SYNCDIRECTION
+    listSyncRepo "$REPO" "$SYNCDIRECTION"
     ;;
 esac

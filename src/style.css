@@ -1,13 +1,21 @@
-a, a:link, a:visited {
+a, a:link, a:visited, button, input[type="submit"] {
   display: inline-block;
   text-decoration: none;
-  appearance: button;
-  -moz-appearance: button;
-  -webkit-appearance: button;
-  -o-appearance: button;
   font: menu;
   color: ButtonText;
   padding: 2px 8px;
+  background-color: #EED;
+  border: 1px outset ButtonText;
+}
+a.delete {
+  color: red;
+}
+a.text {
+  color: navy;
+  font-weight: bold;
+  text-decoration: underline;
+  background-color: transparent;
+  border: none;
 }
 h1 {
   text-align: center;
@@ -16,12 +24,16 @@ textarea {
   width: 800px;
   height: 100px;
 }
+td.key textarea {
+  width: 100%;
+}
 table {
   border: 1px solid black;
   border-collapse: collapse;
   width: 100%;
 }
 table .name,
+table .keyname,
 table .key,
 table .address {
   text-align: left;
@@ -29,6 +41,9 @@ table .address {
 table .member,
 table .actions {
   text-align: center;
+}
+table .keyname {
+  max-width: 50px;
 }
 table th {
   background-color: #EEE;
@@ -40,9 +55,13 @@ table tr:hover {
 }
 #nav {
   padding: 5px 0 5px 20px;
+  border-bottom: 1px solid gray;
 }
 #nav p span {
   font-weight: bold;
+}
+#nav p.breadcrumbs:before {
+  content: "» ";
 }
 div.invite {
   margin-top: 10px;
@@ -68,4 +87,7 @@ div.ro {
 }
 div.ro:after {
   content: " (readonly)";
+}
+#new-desc {
+  min-width: 400px;
 }

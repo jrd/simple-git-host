@@ -6,5 +6,9 @@ if (isset($_POST['payload'])) {
   $repoName = $info['repository']['name'];
   $repoUrl = $info['repository']['url'];
   gitrepoinfo('fetch', $repoName, $repoUrl);
+} else if (isset($_GET['name']) && isset($_GET['url'])) {
+  $repoName = $_GET['name'];
+  $repoUrl = $_GET['url'];
+  gitrepoinfo('fetch', $repoName, $repoUrl);
 }
 ?>

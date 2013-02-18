@@ -22,20 +22,14 @@ if (isset($_POST['submit_pwd'])) {
     $errorMsgPwd = "Le mot de passe n'a pas pu être changé.";
   }
 }
+$pageTitle = "$title - $username";
+require('header.inc.php');
 ?>
-<html>
-  <head>
-    <title><?php echo "$title - $username"; ?></title>
-    <link href="style.css" rel="stylesheet" type="text/css" />
-    <link rel="shortcut icon" href="favicon.png" type="image/png"/>
-  </head>
-  <body>
-    <h1><?php echo "$title - $username"; ?></h1>
-    <div id="nav"><a href="index.php">Index</a></div>
     <div id="keys">
       <div class="invite">Les clés SSH de <span><?php echo $username; ?> </span>:</div>
       <table>
         <tr>
+          <th class="name">Nom</th>
           <th class="key">Clé</th>
           <th class="actions">Action</th>
         </tr>
@@ -44,13 +38,18 @@ $keys = gitrepoinfo('list-keys', $username);
 $i = 0;
 foreach ($keys as $key) {
   $i++;
-  $actions = "<a href=\"user-del-key.php?pos=$i\">Supprimer</a>";
-  echo "        <tr><td class=\"key\"><textarea readonly=\"readonly\">$key</textarea></td><td class=\"actions\">$actions</td></tr>\n";
+  $a = preg_split('/[\s]/', $key);
+  if (count($a) >= 3) {
+    $name = htmlspecialchars($a[2]);
+  } else {
+    $name = ' — ';
+  }
+  $actions = "<a class=\"delete\" href=\"user-del-key.php?pos=$i\" onclick=\"return confirm('Êtes vous sûr de vouloir supprimer cette clé ?');\">Supprimer</a>";
+  echo "        <tr><td class=\"keyname\">$name</td><td class=\"key\"><textarea readonly=\"readonly\">$key</textarea></td><td class=\"actions\">$actions</td></tr>\n";
 }
 ?>
       </table>
     </div>
-    <hr/>
     <div class="error"><?php echo $errorMsgKey; ?></div>
     <form id="add-key" action="" method="POST">
       <fieldset>
@@ -60,7 +59,6 @@ foreach ($keys as $key) {
         <input type="submit" name="submit_key" value="Ajouter"/>
       </fieldset>
     </form>
-    <hr/>
     <div class="error"><?php echo $errorMsgPwd; ?></div>
     <form id="change-pwd" action="" method="POST" autocomplete="off">
       <fieldset>
@@ -70,5 +68,4 @@ foreach ($keys as $key) {
         <input type="submit" name="submit_pwd" value="Changer le mot de passe"/>
       </fieldset>
     </form>
-  </body>
-</html>
+<?php require('footer.inc.php'); ?>
