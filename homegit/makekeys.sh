@@ -1,7 +1,12 @@
 #!/bin/sh
 # vim: et ai cin sw=2 ts=2 tw=0:
+[ "$HOME" = $(dirname $(readlink -f "$0")) ] || exit 255
 cd ~/
 
+if ! [ -d .ssh ]; then
+  mkdir .ssh
+  chmod go= .ssh
+fi
 cat /dev/null > .ssh/authorized_keys.tmp
 for f in .keys/*.keys; do
   u=$(basename $f .keys)
