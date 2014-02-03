@@ -1,9 +1,6 @@
 <?php
-require('include.inc.php');
-if (!$admin) {
-  header('Location: index.php');
-  exit;
-}
+require_once('include.inc.php');
+redirectifnotadmin();
 $errorMsg = '';
 if (isset($_POST['submit_user_add'])) {
   $fUser = $_POST['username'];
@@ -26,7 +23,7 @@ require('header.inc.php');
 <?php
 $users = gitrepoinfo('list-users');
 foreach ($users as $user) {
-  $actions = "<a class=\"delete\" href=\"user-del.php?user=$user\" onclick=\"return confirm('Êtes vous sûr de vouloir supprimer l\'utilisateur \'$user\' ?');\">Supprimer</a>";
+  $actions = "<a class=\"delete\" href=\"/delete_user/$user\" onclick=\"return confirm('Êtes vous sûr de vouloir supprimer l\'utilisateur \'$user\' ?');\">Supprimer</a>";
   echo "        <tr><td class=\"name\">$user</td><td class=\"actions\">$actions</td></tr>\n";
 }
 ?>

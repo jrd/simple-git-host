@@ -1,10 +1,11 @@
 <?php
-require('include.inc.php');
-if (!$logged || !$admin || empty($_GET['user'])) {
-  header('Location: index.php');
+require_once('include.inc.php');
+redirectifnotadmin();
+if (!$logged || empty($_GET['user'])) {
+  header('Location: /');
   exit;
 } else {
   $user = $_GET['user'];
 }
 $res = gitrepoinfo('destroy-user', $user);
-header('Location: admin-users.php');
+header('Location: /admin_users');

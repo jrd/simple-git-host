@@ -30,6 +30,14 @@ function isadmin($user) {
   }
 }
 
+function redirectifnotadmin() {
+  global $admin;
+  if (!$admin) {
+    header('Location: /');
+    exit;
+  }
+}
+
 function auth() {
   global $errorMsg, $logged, $admin;
   if (isset($_POST['submit_auth'])) {
@@ -56,7 +64,7 @@ function auth() {
       // Test si l'utilisateur est admin
       $admin = isadmin($_SESSION['username']);
       // Redirige pour éviter de reposter le formulaire.
-      header('Location: index.php');
+      header('Location: /');
       exit;
     }
   } else {
@@ -68,4 +76,6 @@ function auth() {
   }
 }
 
-auth();
+if (!$logged) {
+  auth();
+}

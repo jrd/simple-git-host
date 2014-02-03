@@ -1,11 +1,8 @@
 <?php
-require('include.inc.php');
-if (!$admin) {
-  header('Location: index.php');
-  exit;
-}
+require_once('include.inc.php');
+redirectifnotadmin();
 if (empty($_GET['repo'])) {
-  header('Location: index.php');
+  header('Location: /');
   exit;
 } else {
   $repo = $_GET['repo'];
@@ -40,10 +37,15 @@ if (isset($_POST['submit_repo_desc'])) {
   if ($res === false) {
     $errorMsgSyncTo = "L'url n'a pas pu être ajoutée.";
   }
+} else if (isset($_POST['submit_repo_syncto_deploy'])) {
+  $res = gitrepoinfo('deploy-key', $repo);
+  if ($res === false) {
+    $errorMsgSyncTo = "La clé de déploiement n'a pas pu être ajoutée.";
+  }
 } else if (isset($_GET['delete']) && $_GET['delete'] == 'syncto') {
   $fUrl = $_GET['url'];
   $res = gitrepoinfo('unsync', $repo, 'to', $fUrl);
-  header("Location: repo-edit.php?repo=$repo");
+  header("Location: /edit/$repo");
 } else if (isset($_POST['submit_repo_syncfrom_add'])) {
   $fUrl = $_POST['new-syncfrom-url'];
   $res = gitrepoinfo('sync', $repo, 'from', $fUrl);
@@ -53,7 +55,7 @@ if (isset($_POST['submit_repo_desc'])) {
 } else if (isset($_GET['delete']) && $_GET['delete'] == 'syncfrom') {
   $fUrl = $_GET['url'];
   $res = gitrepoinfo('unsync', $repo, 'from', $fUrl);
-  header("Location: repo-edit.php?repo=$repo");
+  header("Location: /edit/$repo");
 }
 $pageTitle = "$title - Configuration de $repo";
 require('header.inc.php');
@@ -112,7 +114,7 @@ require('header.inc.php');
   foreach ($urls as $url) {
     echo "        <tr>\n";
     echo "          <td class=\"name\">$url</td>\n";
-    echo "          <td class=\"actions\"><a class=\"delete\" href=\"?repo=$repo&delete=syncto&url=$url\" onclick=\"return confirm('Êtes vous sûr de vouloir supprimer cette url ?');\">Supprimer</a></td>\n";
+    echo "          <td class=\"actions\"><a class=\"delete\" href=\"?delete=syncto&url=$url\" onclick=\"return confirm('Êtes vous sûr de vouloir supprimer cette url ?');\">Supprimer</a></td>\n";
     echo "        </tr>\n";
   }
 ?>
@@ -124,6 +126,15 @@ require('header.inc.php');
           <input type="submit" name="submit_repo_syncto_add" value="Ajouter l'URL"/>
         </fieldset>
       </form>
+      <div class="invite">Deploy key :</div>
+<?php
+  if (file_exists("$gitdir/$repo.git/id_rsa.pub")) {
+    $deploy = file_get_contents("$gitdir/$repo.git/id_rsa.pub");
+    echo "<div><em>$deploy</em></div>\n";
+  } else {
+    echo "<form id=\"repo-syncto-deploy\" action=\"\" method=\"POST\"><input type=\"submit\" name=\"submit_repo_syncto_deploy\" value=\"Générer une clé de déploiement\"/></form>\n";
+  }
+?>
     </div>
     <div id="syncfrom">
       <div class="error"><?php echo $errorMsgSyncFrom; ?></div>
@@ -138,12 +149,12 @@ require('header.inc.php');
   foreach ($urls as $url) {
     echo "        <tr>\n";
     echo "          <td class=\"name\">$url</td>\n";
-    echo "          <td class=\"actions\"><a class=\"delete\" href=\"?repo=$repo&delete=syncfrom&url=$url\" onclick=\"return confirm('Êtes vous sûr de vouloir supprimer cette url ?');\">Supprimer</a></td>\n";
+    echo "          <td class=\"actions\"><a class=\"delete\" href=\"?delete=syncfrom&url=$url\" onclick=\"return confirm('Êtes vous sûr de vouloir supprimer cette url ?');\">Supprimer</a></td>\n";
     echo "        </tr>\n";
   }
 ?>
       </table>
-      <p>Url to trigger synchronization: <a class="text" href="post-update.php">post-update.php</a></p>
+      <p>Url to trigger synchronization: <a class="text" href="/post-update.php">post-update.php</a></p>
       <form id="repo-syncfrom-add" action="" method="POST">
         <fieldset>
           <legend>Ajouter une URL depuis laquelle se synchroniser</legend>

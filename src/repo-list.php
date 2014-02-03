@@ -1,5 +1,5 @@
 <?php
-require('include.inc.php');
+require_once('include.inc.php');
 $errorMsg = '';
 if ($admin && isset($_POST['submit_repo'])) {
   $fRepo = $_POST['new-repo'];
@@ -7,9 +7,11 @@ if ($admin && isset($_POST['submit_repo'])) {
   $res = gitrepoinfo('create', $fRepo, $fDesc);
   if ($res === false) {
     $errorMsg = "Le dépôt n'a pas pu être ajouté.";
-  }
-  if (isset($_POST['new-export']) && $_POST['new-export'] == 'on') {
-    gitrepoinfo('export', $fRepo, 'on');
+  } else {
+    if (isset($_POST['new-export']) && $_POST['new-export'] == 'on') {
+      gitrepoinfo('export', $fRepo, 'on');
+    }
+    gitrepoinfo('add-user', $fRepo, $_SESSION['username']); # add current user to the newly created repo.
   }
 }
 $pageTitle = $title;
@@ -43,10 +45,10 @@ foreach ($files as $file) {
         $membre = "Non";
       }
     }
-    $actions = "<a href=\"repo-users.php?repo=$proj\">Utilisateurs</a>&nbsp;<a href=\"repo-histo.php?repo=$proj\">Historique</a>";
+    $actions = "<a href=\"/info/$proj\">Info</a>&nbsp;<a href=\"/users/$proj\">Utilisateurs</a>&nbsp;<a href=\"/histo/$proj\">Historique</a>";
     if ($admin) {
-      $actions .= "&nbsp;<a class=\"edit\" href=\"repo-edit.php?repo=$proj\">Éditer</a>";
-      $actions .= "&nbsp;<a class=\"delete\" href=\"repo-del.php?repo=$proj\" onclick=\"return confirm('Êtes vous sûr de vouloir supprimer le dépôt \'$proj\' ?');\">Supprimer</a>";
+      $actions .= "&nbsp;<a class=\"edit\" href=\"/edit/$proj\">Éditer</a>";
+      $actions .= "&nbsp;<a class=\"delete\" href=\"/delete/$proj\" onclick=\"return confirm('Êtes vous sûr de vouloir supprimer le dépôt \'$proj\' ?');\">Supprimer</a>";
     }
     $name = $proj;
     $exportok = file_exists("$gitdir/$file/git-daemon-export-ok");
@@ -54,7 +56,7 @@ foreach ($files as $file) {
       $name .= "&nbsp;<a href=\"$gitwebpath/?p=$file\">⇒</a>";
     }
     echo "        <tr><td class=\"name\" title=\"$desc\">$name</td><td class=\"address\">";
-    echo "<div class=\"rw\">$gituser@$githost:$gitdir/$file</div>";
+    echo "<div class=\"rw\">$gituser@$githost:$file</div>";
     if ($exportok) {
       echo "<div class=\"ro\">git://$githost/$file</div>";
     }
@@ -85,6 +87,6 @@ foreach ($files as $file) {
         </table>
       </fieldset>
     </form>
-    <a href="admin-users.php">Gestion des utilisateurs</a>
+    <a href="/manage_users">Gestion des utilisateurs</a>
 <?php } ?>
 <?php require('footer.inc.php'); ?>

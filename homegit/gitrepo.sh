@@ -1,6 +1,5 @@
 #!/bin/sh
 # vim: et ai cin sw=2 ts=2 tw=0:
-[ "$HOME" = $(dirname $(readlink -f "$0")) ] || exit 255
 cd ~/
 
 usage() {
@@ -42,6 +41,7 @@ Action is one of:
      {'repository': {'name', 'url'}
  - unsync Name from|to url
    remove sync previously set by 'sync' command.
+ - deploy-key Name
  - listsync Name from|to
    list the url that are synchronized from or to, as defined by 'sync' command.
 EOF
@@ -313,7 +313,7 @@ fetch() {
   if [ -f "$NAME".git/fetchremotes ] && grep -q -F "$URL" "$NAME".git/fetchremotes; then
     (
       cd "$NAME".git
-      git fetch "$URL"
+      git fetch -f "$URL" *:*
     )
   fi
 }
@@ -435,6 +435,14 @@ listSyncRepo() {
   fi
 }
 
+deployKeyRepo() {
+  NAME="$1"
+  check_repo "$NAME"
+  [ -e "$NAME".git/id_rsa ] && rm "$NAME".git/id_rsa
+  [ -e "$NAME".git/id_rsa.pub ] && rm "$NAME".git/id_rsa.pub
+  ssh-keygen -q -t rsa -N '' -f "$NAME".git/id_rsa
+}
+
 ACTION=''
 NAME=''
 REPO=''
@@ -455,7 +463,7 @@ while [ -n "$1" ]; do
       ;;
     *)
       if [ -z "$ACTION" ]; then
-        if echo "$1" | grep -q '^\(create\|destroy\|get\|set\|list-users\|create-user\|change-user\|show-pwd\|destroy-user\|show-users\|add-user\|del-user\|list-keys\|add-key\|del-key\|graph\|fetch\|export\|sync\|unsync\|listsync\)$'; then
+        if echo "$1" | grep -q '^\(create\|destroy\|get\|set\|list-users\|create-user\|change-user\|show-pwd\|destroy-user\|show-users\|add-user\|del-user\|list-keys\|add-key\|del-key\|graph\|fetch\|export\|sync\|unsync\|listsync\|deploy-key\)$'; then
           ACTION="$1"
           shift
         else
@@ -577,6 +585,9 @@ while [ -n "$1" ]; do
               echo "Unrecognized parameter ($1)" >&2
               exit 1
             fi
+          elif [ "$ACTION" = "deploy-key" ]; then
+            echo "Unrecognized parameter ($1)" >&2
+            exit 1
           fi
         fi
       fi
@@ -690,5 +701,10 @@ case "$ACTION" in
     REPO="$NAME"
     checkparams REPO SYNCDIRECTION
     listSyncRepo "$REPO" "$SYNCDIRECTION"
+    ;;
+  deploy-key)
+    REPO="$NAME"
+    checkparams REPO
+    deployKeyRepo "$REPO"
     ;;
 esac

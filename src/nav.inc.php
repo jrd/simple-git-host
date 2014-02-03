@@ -1,9 +1,9 @@
 <div id="nav">
-  <p class="breadcrumbs"><a href="index.php">Index</a></p>
+  <p class="breadcrumbs"><a href="/">Index</a></p>
 <?php
 if ($logged) {
   echo "<p>Vous êtes connecté en tant que <span>" . $_SESSION['username'] . "</span><br/>\n";
-  echo "<a href=\"account.php\">Mon compte</a>&nbsp;<a href=\"disconnect.php\">Se déconnecter</a></p>\n";
+  echo "<a href=\"/account\">Mon compte</a>&nbsp;<a href=\"/disconnect\">Se déconnecter</a></p>\n";
 } else {
   echo "<div class=\"error\">$errorMsg</div>\n";
   echo <<<EOF

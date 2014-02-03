@@ -17,6 +17,21 @@ a.text {
   background-color: transparent;
   border: none;
 }
+a.file-dl, a.file-show {
+  color: blue;
+  text-decoration: none;
+  background-color: transparent;
+  border: none;
+  padding: 0;
+}
+a.image {
+  color: navy
+  font-weight: bold;
+  text-decoration: none;
+  padding: 0;
+  background-color: transparent;
+  border: none;
+}
 h1 {
   text-align: center;
 }
@@ -90,4 +105,32 @@ div.ro:after {
 }
 #new-desc {
   min-width: 400px;
+}
+#repoinfo {
+  margin: auto;
+  clear: both;
+}
+#repoinfo div.info {
+  width: 400px;
+  margin-left: 10px;
+  margin-right: 10px;
+  float: right;
+}
+#repoinfo div.files {
+  margin-left: 10px;
+  margin-right: 10px;
+}
+#repoinfo div.files div {
+  max-height: 300px;
+  overflow: auto;
+}
+#repo-toolbar {
+  margin: 5px;
+  float: right;
+}
+#selected-branch {
+  font-weight: bold;
+}
+#selected-branch option[selected=selected] {
+  font-style: italic;
 }

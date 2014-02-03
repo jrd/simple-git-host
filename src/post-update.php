@@ -1,5 +1,5 @@
 <?php
-require('include.inc.php');
+require_once('include.inc.php');
 if (isset($_POST['payload'])) {
   // github post update
   $info = json_decode($_POST['payload'], true);
@@ -11,19 +11,11 @@ if (isset($_POST['payload'])) {
   $repoUrl = $_GET['url'];
   gitrepoinfo('fetch', $repoName, $repoUrl);
 } else {
-  echo <<<'EOF'
-<html><body><pre>
-You must pass some variables to this script:
-  - name, name of the repository to synchronize to.
-  - url, full url of the repository to synchronize from.
-You can pass it through POST or GET method.
+  echo "<pre>
+You should provide a 'payload' variable in POST, with the corresponding format:
+{repository: {name: 'local repository name', url: 'remote url'}}
 
-For GET method, just supply these two variables.
-
-For POST method, you should supply a json encoded 'payload' variable.
-This variable should contains a array named 'repository' with 'name' and 'url' variable in it.
-This method is the way Github works.
-</pre></body></html>
-EOF;
+You could also provide the 'name' and 'url' variable directly by GET method.
+</pre>";
 }
 ?>

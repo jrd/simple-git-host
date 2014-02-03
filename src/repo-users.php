@@ -1,7 +1,7 @@
 <?php
-require('include.inc.php');
+require_once('include.inc.php');
 if (empty($_GET['repo'])) {
-  header('Location: index.php');
+  header('Location: /');
   exit;
 } else {
   $repo = $_GET['repo'];
@@ -29,7 +29,7 @@ $users = gitrepoinfo('show-users', $repo);
 foreach ($users as $user) {
   $actions = ' — ';
   if ($admin) {
-    $actions = "<a href=\"repo-user-del.php?repo=$repo&user=$user\">Retirer</a>";
+    $actions = "<a href=\"/remove_user/$repo/$user\">Retirer</a>";
   }
   echo "        <tr><td class=\"name\">$user</td><td class=\"actions\">$actions</td></tr>\n";
 }

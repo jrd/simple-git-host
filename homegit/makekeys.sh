@@ -1,6 +1,5 @@
 #!/bin/sh
 # vim: et ai cin sw=2 ts=2 tw=0:
-[ "$HOME" = $(dirname $(readlink -f "$0")) ] || exit 255
 cd ~/
 
 if ! [ -d .ssh ]; then
