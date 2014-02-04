@@ -91,9 +91,9 @@ exec("GIT_DIR=$gitdir/$repo.git git ls-tree -r --name-only -z refs/heads/$select
           <?php foreach ($files as $file) {
             $fileEncoded = urlencode($file);
             $fileHtml = htmlspecialchars($file);
-            echo "<a class=\"file-dl\" title=\"Télécharger $fileHtml\" href=\"/download_file/$repo/$selectedBranch/$fileEncoded\"><strong>↓</strong>";
+            echo "<a class=\"file-dl\" title=\"Télécharger $fileHtml\" href=\"/download_file/$repo/$selectedBranch/$fileEncoded/dl\"><strong>↓</strong>";
             echo "&nbsp;";
-            echo "<a class=\"file-show\" target=\"_blank\" title=\"Afficher $fileHtml\" href=\"/show_file/$repo/$selectedBranch/$fileEncoded\">$fileHtml</a></a><br/>\n";
+            echo "<a class=\"file-show\" target=\"_blank\" title=\"Afficher $fileHtml\" href=\"/show_file/$repo/$selectedBranch/$fileEncoded/show\">$fileHtml</a></a><br/>\n";
           } ?>
         </div>
       </div>

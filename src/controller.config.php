@@ -120,7 +120,7 @@ function action_download_branch($args) {
 }
 
 function action_show_file($args) {
-  if (count($args) == 3 && !empty($args[0]) && !empty($args[1]) && !empty($args[2])) {
+  if (count($args) == 4 && !empty($args[0]) && !empty($args[1]) && !empty($args[2]) && $args[3] == 'show') {
     extract($GLOBALS);
     $_GET['repo'] = $args[0];
     $_GET['branch'] = $args[1];
@@ -133,7 +133,7 @@ function action_show_file($args) {
 }
 
 function action_download_file($args) {
-  if (count($args) == 3 && !empty($args[0]) && !empty($args[1]) && !empty($args[2])) {
+  if (count($args) == 4 && !empty($args[0]) && !empty($args[1]) && !empty($args[2]) && $args[3] == 'dl') {
     extract($GLOBALS);
     $_GET['repo'] = $args[0];
     $_GET['branch'] = $args[1];
