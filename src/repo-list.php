@@ -58,7 +58,9 @@ foreach ($files as $file) {
     echo "        <tr><td class=\"name\" title=\"$desc\">$name</td><td class=\"address\">";
     echo "<div class=\"rw\">$gituser@$githost:$file</div>";
     if ($exportok) {
-      echo "<div class=\"ro\">git://$githost/$file</div>";
+      echo "<div class=\"ro-git\">git://$githost/$file</div>";
+      $httpurl = sprintf('%s://%s/git/%s', isset($_SERVER['HTTPS']) ? 'https' : 'http', $_SERVER['HTTP_HOST'], $file);
+      echo "<div class=\"ro-http\">$httpurl</div>";
     }
     echo "</td><td class=\"member\">$membre</td><td class=\"actions\">$actions</td></tr>\n";
   }

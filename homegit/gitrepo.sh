@@ -324,8 +324,18 @@ exportRepo() {
   check_repo "$NAME"
   if [ "$DOEXPORT" = "on" ]; then
     touch "$NAME".git/git-daemon-export-ok
+    (
+      cd "$NAME".git
+      git config http.getanyfile false
+      git config http.uploadpack true
+      git config http.receivepack false
+    )
   else
     rm -f "$NAME".git/git-daemon-export-ok
+    (
+      cd "$NAME".git
+      git config --unset-all http
+    )
   fi
 }
 

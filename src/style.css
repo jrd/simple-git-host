@@ -95,13 +95,24 @@ div.rw {
   color: black;
   font-weight: bold;
 }
-div.ro {
-  color: gray;
+div.rw:after {
+  content: " (rw)";
   font-style: italic;
+  color: gray;
+}
+div.ro-git,
+div.ro-http {
+  color: maroon;
   padding-left: 20px;
 }
-div.ro:after {
+div.ro-http {
+  margin-bottom: 5px;
+}
+div.ro-git:after,
+div.ro-http:after {
   content: " (readonly)";
+  font-style: italic;
+  color: gray;
 }
 #new-desc {
   min-width: 400px;

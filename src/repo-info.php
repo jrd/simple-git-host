@@ -81,7 +81,9 @@ exec("GIT_DIR=$gitdir/$repo.git git ls-tree -r --name-only -z refs/heads/$select
           <h2>URL</h2>
           <div class="rw"><?php echo "$gituser@$githost:$repo.git"; ?></div>
           <?php if (file_exists("$gitdir/$repo.git/git-daemon-export-ok")) { ?>
-            <div class="ro"><?php echo "git://$githost/$repo.git"; ?></div>
+            <div class="ro-git"><?php echo "git://$githost/$repo.git"; ?></div>
+            <?php $httpurl = sprintf('%s://%s/git/%s.git', isset($_SERVER['HTTPS']) ? 'https' : 'http', $_SERVER['HTTP_HOST'], $repo); ?>
+            <div class="ro-http"><?php echo "$httpurl"; ?></div>
           <?php } ?>
         </div>
       </div>

@@ -126,6 +126,47 @@ Here is the configuration to add to your virtual host apache file:
     AddHandler cgi-script cgi
     DirectoryIndex gitweb.cgi
   </Directory>
+ 
+For nginx, here is one configuration snippet:
+  server {
+    listen       localhost:80;
+    server_name  $GIT_HOST;
+    root   /var/www/$GIT_WEB_PATH;
+    index  controller.php;
+    access_log  /var/www/$GIT_WEB_PATH/../logs/access.log combined;
+    error_log /var/www/$GIT_WEB_PATH/../logs/error.log;
+    location / {
+      try_files \$uri \$uri/ /controller.php?\$args;
+    }
+    location ~ \.php$ {
+      # pass the PHP scripts to FastCGI server listening on 127.0.0.1:9001
+      fastcgi_pass   unix:/var/run/php-fpm.sock;
+      include        fastcgi_params;
+      fastcgi_param  SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
+    }
+    location /gitweb/ {
+      gzip off;
+      index          gitweb.cgi;
+      include        fastcgi_params;
+      fastcgi_param  SCRIPT_NAME gitweb.cgi; 
+      fastcgi_param  SCRIPT_FILENAME /var/www/$GIT_WEB_PATH/gitweb/gitweb.cgi;
+      fastcgi_param  GITWEB_CONFIG /etc/gitweb.conf;
+      if (\$uri ~ "/gitweb/gitweb.cgi") {
+        fastcgi_pass   unix:/var/run/fcgiwrap.sock;
+      }
+    }
+    location ~ /git(/.*) {
+      gzip off;
+      # Set chunks to unlimited, as the body's can be huge
+      client_max_body_size 0;
+      fastcgi_pass unix:/var/run/fcgiwrap.sock;
+      include fastcgi_params;
+      fastcgi_param SCRIPT_FILENAME /usr/libexec/git-core/git-http-backend;
+      fastcgi_param GIT_HTTP_EXPORT_ALL "";
+      fastcgi_param GIT_PROJECT_ROOT $GIT_DIR;
+      fastcgi_param PATH_INFO \$1;
+    }
+  }
 
 Have fun ;-)
 EOF
