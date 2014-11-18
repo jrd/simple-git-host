@@ -126,7 +126,7 @@ require('header.inc.php');
           <input type="submit" name="submit_repo_syncto_add" value="Ajouter l'URL"/>
         </fieldset>
       </form>
-      <div class="invite">Deploy key :</div>
+      <div class="invite">Clé de déploiement :</div>
 <?php
   if (file_exists("$gitdir/$repo.git/id_rsa.pub")) {
     $deploy = file_get_contents("$gitdir/$repo.git/id_rsa.pub");

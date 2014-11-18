@@ -33,7 +33,7 @@ Action is one of:
  - fetch Name Url
    Fetch all remotes if the Url is in Name.git/fetchurls file
  - export Name on|off
-   Export (or not) the following repo as read-only for git-daemon
+   Export (or not) the following repo as read-only for git-daemon and git-http-backend
  - sync Name from|to url
    Synchronize from or to the following URL.
    Sync to is done automatically at each commit. Be careful to add git user ssl keys to remote repo.
@@ -375,7 +375,18 @@ EOF
     chmod +x "$NAME".git/hooks/post-update
     mkdir -p "$NAME".git/hooks/.post-update.d
   fi
-  echo "git push --quiet $HOST &" > "$NAME".git/hooks/.post-update.d/$HOST
+  if [ ! -f "$NAME".git/.sshwrapper ]; then
+    cat <<'EOF' > "$NAME".git/.sshwrapper
+ssh \
+  -o UserKnownHostsFile=/dev/null \
+  -o StrictHostKeyChecking=no \
+  -o LogLevel=ERROR \
+  -i $(dirname "$0")/id_rsa \
+  "$@"
+EOF
+    chmod +x "$NAME".git/sshwrapper
+  fi
+  echo 'GIT_SSH=$(readlink -f $(dirname "$0")/../../.sshwrapper) git push --quiet'" $HOST &" > "$NAME".git/hooks/.post-update.d/$HOST
   chmod +x "$NAME".git/hooks/.post-update.d/$HOST
 }
 
