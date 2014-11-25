@@ -1,0 +1,132 @@
+#!/bin/sh
+PREFIX=/var/www/git/pages
+LOGS=/var/www/git/logs
+WEB_BASE_DIR=
+GITWEB_DIR=gitweb
+GIT_HOSTNAME=localhost
+GIT_HOSTPORT=80
+GIT_USER=git
+GIT_HOME=/home/$GIT_USER
+WEB_USER=nobody
+WEB_TYPE=nginx
+WEB_TITLE="Git Repositories"
+
+usage() {
+  cat <<EOF
+configure [OPTIONS]
+
+OPTIONS:
+  --help                      print this message
+
+  --prefix=PREFIX             install web files into PREFIX [$PREFIX]
+  --logsdir=DIR               logs location of the web site [$LOGS]
+  --webbasedir=NAME           NAME of the web base dir, empty for virtual host [$WEB_BASE_DIR]
+  --gitwebdir=NAME            NAME of the gitweb directory [$GITWEB_DIR]
+  --githostname=HOSTNAME      HOSTNAME of the git service [$GIT_HOSTNAME]
+  --githostport=PORT          PORT of the git service [$GIT_HOSTPORT]
+  --githome=DIR               location where to store the repositories [$GIT_HOME]
+                              This directory will be created if not exists.
+  --gituser=USER              system USER to handle the repositories [$GIT_USER]
+                              This user will be created if not exists.
+  --webuser=USER              system USER to run the webserver [$WEB_USER]
+                              This user should exist.
+  --webtype=TYPE              TYPE of webserver. Could be nginx, apache or none.
+                              Will generate the corresponding template here.
+                              Default to [$WEB_TYPE]
+  --webtitle=TITLE            TITLE of the web site [$WEB_TITLE]
+EOF
+}
+
+while [ -n "$1" ] && [ "$1" != "--" ]; do
+  ARG="$1"
+  shift
+  case "$ARG" in
+    --help|-h)
+      usage
+      exit 0
+      ;;
+    --prefix=*)
+      PREFIX=$(echo "$ARG"|cut -d= -f2-)
+      ;;
+    --logsdir=*)
+      LOGS=$(echo "$ARG"|cut -d= -f2-)
+      ;;
+    --webbasedir=*)
+      WEB_BASE_DIR=$(echo "$ARG"|cut -d= -f2-)
+      ;;
+    --gitwebdir=*)
+      GITWEB_DIR=$(echo "$ARG"|cut -d= -f2-)
+      ;;
+    --githostname=*)
+      GIT_HOSTNAME=$(echo "$ARG"|cut -d= -f2-)
+      ;;
+    --githostport=*)
+      GIT_HOSTPORT=$(echo "$ARG"|cut -d= -f2-)
+      ;;
+    --githome=*)
+      GIT_HOME=$(echo "$ARG"|cut -d= -f2-)
+      ;;
+    --gituser=*)
+      GIT_USER=$(echo "$ARG"|cut -d= -f2-)
+      ;;
+    --webuser=*)
+      WEB_USER=$(echo "$ARG"|cut -d= -f2-)
+      ;;
+    --webtype=*)
+      val=$(echo "$ARG"|cut -d= -f2-)
+      if [ "$val" = "nginx" ] || [ "$val" = "apache" ] || [ "$val" = "none" ]; then
+        WEB_TYPE=$val
+      else
+        echo "Unrecognized web type: $val" >&2
+        exit 1
+      fi
+      ;;
+    --webtitle=*)
+      WEB_TITLE=$(echo "$ARG"|cut -d= -f2-)
+      ;;
+    *)
+      echo "Unrecognized parameter: $ARG" >&2
+      exit 1
+  esac
+done
+
+if [ ! -d "$PREFIX" ]; then
+  echo "Prefix $PREFIX does not exist." >&2
+  exit 2
+fi
+PREFIX=$(readlink -f "$PREFIX")
+if [ ! -d "$LOGS" ]; then
+  echo "Logs directory $LOGS does not exist." >&2
+  exit 2
+fi
+LOGS=$(readlink -f "$LOGS")
+if echo "$GIT_HOSTPORT"|grep -vq '^[0-9]\+$'; then
+  echo "Git host port $GIT_HOSTPORT does not seems to be valid." >&2
+  exit 2
+fi
+GIT_HOME=$(readlink -f "$GIT_HOME")
+if [ -n "$WEB_BASE_DIR" ] && echo "$WEB_BASE_DIR"|grep -vq '/$'; then
+  WEB_BASE_DIR="$WEB_BASE_DIR/"
+fi
+GITWEB_DIR=$(echo "$GITWEB_DIR"|sed 's,/$,,')
+if grep -vq "^$WEB_USER:" /etc/passwd; then
+  echo "Web user '$WEB_USER' does not exist" >&2
+  exit 2
+fi
+
+cd $(dirname "$0")
+cat <<EOF > config.mk
+PREFIX = $PREFIX
+LOGS = $LOGS
+WEB_BASE_DIR = $WEB_BASE_DIR
+GITWEB_DIR = $GITWEB_DIR
+GIT_HOSTNAME = $GIT_HOSTNAME
+GIT_HOSTPORT = $GIT_HOSTPORT
+GIT_USER = $GIT_USER
+GIT_HOME = $GIT_HOME
+WEB_USER = $WEB_USER
+WEB_TYPE = $WEB_TYPE
+WEB_TITLE = $WEB_TITLE
+EOF
+
+[ -d git-master ] || wget https://github.com/git/git/archive/master.tar.gz -O - | tar xzf -
