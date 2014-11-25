@@ -25,7 +25,7 @@ require('header.inc.php');
           <th class="actions">Actions</th>
         </tr>
 <?php
-$users = gitrepoinfo('show-users', $repo);
+$users = array_map(function($val) { return explode(':', $val)[0]; }, gitrepoinfo('show-users', $repo));
 foreach ($users as $user) {
   $actions = ' — ';
   if ($admin) {

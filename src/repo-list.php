@@ -36,7 +36,7 @@ foreach ($files as $file) {
     if (empty($desc) || preg_match('/^Unnamed repository;/', $desc)) {
       $desc = $proj;
     }
-    $users = gitrepoinfo('show-users', $proj);
+    $users = array_map(function($val) { return explode(':', $val)[0]; }, gitrepoinfo('show-users', $proj));
     $membre = count($users) > 0 ? '<span title="Veuillez vous identifier"> ? </span>' : '<span title="Aucun utilisateur"> — </span>';
     if ($logged && count($users) > 0) {
       if (in_array($_SESSION['username'], $users)) {

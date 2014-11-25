@@ -6,6 +6,20 @@ usage() {
   cat <<EOF
 $0 Action Parameters
 Action is one of:
+ - list-users
+ - create-user Username Password [Key]
+   Password should be in md5
+ - change-user Username Password
+ - show-pwd Username
+ - user-set-admin Username true|false
+ - user-is-admin Username
+ - list-keys Username
+ - add-key Username Key
+ - del-key Username Key
+   del-key Username Position
+   Position starts from 1 as listed by list-keys
+ - destroy-user Username
+ 
  - create Name [Description]
  - destroy Name
  - get Name Option
@@ -13,21 +27,13 @@ Action is one of:
    * 'description'
    * a git configuration option
  - set Name Option Value
- - list-users
- - create-user Username Password [Key]
-   Password should be in md5
- - change-user Username Password
- - show-pwd Username
- - destroy-user Username
+
  - show-users Name
- - add-user Name Username
+ - add-user Name Username [admin|user|readonly]
    Username should already exists
+   Default right is user
  - del-user Name Username
- - list-keys Username
- - add-key Username Key
- - del-key Username Key
-   del-key Username Position
-   Position starts from 1 as listed by list-keys
+ 
  - graph Name
    Show a graphical representation of the repository.
  - fetch Name Url
@@ -69,10 +75,147 @@ check_repo() {
 
 check_username() {
   NAME="$1"
-  if echo "$NAME" | grep -q '[^-_a-zA-Z0-9]'; then
-    echo "User name can only contains letters, numbers, hyphen and underscore" >&2
+  if echo "$NAME" | grep -q '[^-_.@a-zA-Z0-9]'; then
+    echo "User name can only contains letters, numbers, hyphen, underscore, dot and at sign" >&2
     exit 2
   fi
+}
+
+list_users() {
+  for f in .keys/*.pwd; do
+    basename $f .pwd
+  done
+}
+
+create_user() {
+  USERNAME="$1"
+  PASSWD="$2"
+  KEY="$3"
+  check_username "$USERNAME"
+  if [ -f .keys/$USERNAME.pwd ]; then
+    echo "$USERNAME already exists." >&2
+    exit 2
+  fi
+  mkdir -p .keys
+  echo "$PASSWD" > .keys/$USERNAME.pwd
+  if [ -n "$KEY" ]; then
+    echo "$KEY" > .keys/$USERNAME.keys
+  else
+    touch .keys/$USERNAME.keys
+  fi
+  ./makekeys.sh
+}
+
+change_user() {
+  USERNAME="$1"
+  PASSWD="$2"
+  check_username "$USERNAME"
+  if [ ! -f .keys/$USERNAME.pwd ]; then
+    echo "$USERNAME does not exists." >&2
+    exit 2
+  fi
+  mkdir -p .keys
+  echo "$PASSWD" > .keys/$USERNAME.pwd
+}
+
+show_pwd() {
+  USERNAME="$1"
+  check_username "$USERNAME"
+  if [ ! -f .keys/$USERNAME.pwd ]; then
+    echo "$USERNAME does not exists." >&2
+    exit 2
+  fi
+  cat .keys/$USERNAME.pwd
+}
+
+user_set_admin() {
+  USERNAME="$1"
+  ADMIN="$2"
+  check_username "$USERNAME"
+  if [ ! -f .keys/$USERNAME.pwd ]; then
+    echo "$USERNAME does not exists." >&2
+    exit 2
+  fi
+  mkdir -p .admins
+  if [ "$ADMIN" = "true" ]; then
+    touch .admins/$USERNAME
+  else
+    rm -f .admins/$USERNAME
+  fi
+}
+
+user_is_admin() {
+  USERNAME="$1"
+  check_username "$USERNAME"
+  if [ ! -f .keys/$USERNAME.pwd ]; then
+    echo "$USERNAME does not exists." >&2
+    exit 2
+  fi
+  if [ -e .admins/$USERNAME ]; then
+    echo true
+    true
+  else
+    echo false
+    false
+  fi
+}
+
+list_keys() {
+  USERNAME="$1"
+  check_username "$USERNAME"
+  if [ ! -f .keys/$USERNAME.pwd ]; then
+    echo "$USERNAME does not exists." >&2
+    exit 2
+  fi
+  cat .keys/$USERNAME.keys
+}
+
+add_key() {
+  USERNAME="$1"
+  KEY="$2"
+  check_username "$USERNAME"
+  if [ ! -f .keys/$USERNAME.pwd ]; then
+    echo "$USERNAME does not exists." >&2
+    exit 2
+  fi
+  echo "$KEY" >> .keys/$USERNAME.keys
+  ./makekeys.sh
+}
+
+del_key() {
+  USERNAME="$1"
+  KEY="$2"
+  check_username "$USERNAME"
+  if [ ! -f .keys/$USERNAME.pwd ]; then
+    echo "$USERNAME does not exists." >&2
+    exit 2
+  fi
+  if echo "$KEY" | grep -q "^[0-9]\+$"; then
+    if [ $KEY -eq 1 ]; then
+      sed -i -n '2,$p' .keys/$USERNAME.keys
+    else
+      prev=$(($KEY - 1))
+      next=$(($KEY + 1))
+      sed -i -n "1,${prev}p; ${next},\$p" .keys/$USERNAME.keys
+    fi
+  else
+    sed -i "/^$KEY\$/d" .keys/$USERNAME.keys
+  fi
+  ./makekeys.sh
+}
+
+destroy_user() {
+  USERNAME="$1"
+  check_username "$USERNAME"
+  if [ ! -f .keys/$USERNAME.pwd ]; then
+    echo "$USERNAME does not exists." >&2
+    exit 2
+  fi
+  rm .keys/$USERNAME.*
+  for p in ?*.git; do
+    [ -e $p/.users ] && sed -i "/^$USERNAME:.*/d" $p/.users
+  done
+  ./makekeys.sh
 }
 
 create_repo() {
@@ -145,70 +288,10 @@ set_option() {
   fi
 }
 
-list_users() {
-  for f in .keys/*.pwd; do
-    basename $f .pwd
-  done
-}
-
-create_user() {
-  USERNAME="$1"
-  PASSWD="$2"
-  KEY="$3"
-  check_username "$USERNAME"
-  if [ -f .keys/$USERNAME.pwd ]; then
-    echo "$USERNAME already exists." >&2
-    exit 2
-  fi
-  mkdir -p .keys
-  echo "$PASSWD" > .keys/$USERNAME.pwd
-  if [ -n "$KEY" ]; then
-    echo "$KEY" > .keys/$USERNAME.keys
-  else
-    touch .keys/$USERNAME.keys
-  fi
-  ./makekeys.sh
-}
-
-change_user() {
-  USERNAME="$1"
-  PASSWD="$2"
-  check_username "$USERNAME"
-  if [ ! -f .keys/$USERNAME.pwd ]; then
-    echo "$USERNAME does not exists." >&2
-    exit 2
-  fi
-  mkdir -p .keys
-  echo "$PASSWD" > .keys/$USERNAME.pwd
-}
-
-show_pwd() {
-  USERNAME="$1"
-  check_username "$USERNAME"
-  if [ ! -f .keys/$USERNAME.pwd ]; then
-    echo "$USERNAME does not exists." >&2
-    exit 2
-  fi
-  cat .keys/$USERNAME.pwd
-}
-
-destroy_user() {
-  USERNAME="$1"
-  check_username "$USERNAME"
-  if [ ! -f .keys/$USERNAME.pwd ]; then
-    echo "$USERNAME does not exists." >&2
-    exit 2
-  fi
-  rm .keys/$USERNAME.*
-  for p in ?*.git; do
-    [ -e $p/.users ] && sed -i "/^$USERNAME\$/d" $p/.users
-  done
-  ./makekeys.sh
-}
-
 add_user() {
   REPO="$1"
   USERNAME="$2"
+  RIGHT="$3"
   check_repo "$REPO"
   check_username "$USERNAME"
   if [ ! -d "$REPO".git ]; then
@@ -220,7 +303,11 @@ add_user() {
     exit 2
   fi
   [ -e "$REPO".git/.users ] || touch "$REPO".git/.users
-  grep -q "^$USERNAME\$" "$REPO".git/.users || echo "$USERNAME" >> "$REPO".git/.users
+  if grep -q "^$USERNAME:.*" "$REPO".git/.users; then
+    sed -i -r "s/^$USERNAME:.*/$USERNAME:$RIGHT" "$REPO".git/.users
+  else
+    echo "$USERNAME:$RIGHT" >> "$REPO".git/.users
+  fi
 }
 
 del_user() {
@@ -233,7 +320,7 @@ del_user() {
     exit 2
   fi
   if [ -e "$REPO".git/.users ]; then
-    grep -q "^$USERNAME\$" "$REPO".git/.users && sed -i "/^$USERNAME\$/d" "$REPO".git/.users
+    grep -q "^$USERNAME:.*" "$REPO".git/.users && sed -i "/^$USERNAME:.*/d" "$REPO".git/.users
   fi
 }
 
@@ -247,50 +334,6 @@ show_users() {
   if [ -f "$REPO".git/.users ]; then
     cat "$REPO".git/.users
   fi
-}
-
-list_keys() {
-  USERNAME="$1"
-  check_username "$USERNAME"
-  if [ ! -f .keys/$USERNAME.pwd ]; then
-    echo "$USERNAME does not exists." >&2
-    exit 2
-  fi
-  cat .keys/$USERNAME.keys
-}
-
-add_key() {
-  USERNAME="$1"
-  KEY="$2"
-  check_username "$USERNAME"
-  if [ ! -f .keys/$USERNAME.pwd ]; then
-    echo "$USERNAME does not exists." >&2
-    exit 2
-  fi
-  echo "$KEY" >> .keys/$USERNAME.keys
-  ./makekeys.sh
-}
-
-del_key() {
-  USERNAME="$1"
-  KEY="$2"
-  check_username "$USERNAME"
-  if [ ! -f .keys/$USERNAME.pwd ]; then
-    echo "$USERNAME does not exists." >&2
-    exit 2
-  fi
-  if echo "$KEY" | grep -q "^[0-9]\+$"; then
-    if [ $KEY -eq 1 ]; then
-      sed -i -n '2,$p' .keys/$USERNAME.keys
-    else
-      prev=$(($KEY - 1))
-      next=$(($KEY + 1))
-      sed -i -n "1,${prev}p; ${next},\$p" .keys/$USERNAME.keys
-    fi
-  else
-    sed -i "/^$KEY\$/d" .keys/$USERNAME.keys
-  fi
-  ./makekeys.sh
 }
 
 graph() {
@@ -470,6 +513,8 @@ NAME=''
 REPO=''
 USERNAME=''
 PASSWD=''
+ADMIN=''
+RIGHT=''
 DESC=''
 OPTION=''
 OPT_VAL=''
@@ -485,7 +530,7 @@ while [ -n "$1" ]; do
       ;;
     *)
       if [ -z "$ACTION" ]; then
-        if echo "$1" | grep -q '^\(create\|destroy\|get\|set\|list-users\|create-user\|change-user\|show-pwd\|destroy-user\|show-users\|add-user\|del-user\|list-keys\|add-key\|del-key\|graph\|fetch\|export\|sync\|unsync\|listsync\|deploy-key\)$'; then
+        if echo "$1" | grep -q '^\(list-users\|create-user\|change-user\|show-pwd\|user-set-admin\|user-is-admin\|list-keys\|add-key\|del-key\|destroy-user\|create\|destroy\|get\|set\|show-users\|add-user\|del-user\|graph\|fetch\|export\|sync\|unsync\|listsync\|deploy-key\)$'; then
           ACTION="$1"
           shift
         else
@@ -500,28 +545,9 @@ while [ -n "$1" ]; do
           NAME="$1"
           shift
         else
-          if [ "$ACTION" = "create" ]; then
-            if [ -z "$DESC" ]; then
-              DESC="$1"
-              shift
-            else
-              echo "Unrecognized parameter ($1)" >&2
-              exit 1
-            fi
-          elif [ "$ACTION" = "destroy" ]; then
+          if [ "$ACTION" = "list-keys" ]; then
             echo "Unrecognized parameter ($1)" >&2
             exit 1
-          elif [ "$ACTION" = "get" ] || [ "$ACTION" = "set" ]; then
-            if [ -z "$OPTION" ]; then
-              OPTION="$1"
-              shift
-            elif [ "$ACTION" = "set" ] && [ -z "$OPT_VAL" ]; then
-              OPT_VAL="$1"
-              shift
-            else
-              echo "Unrecognized parameter ($1)" >&2
-              exit 1
-            fi
           elif [ "$ACTION" = "create-user" ]; then
             if [ -z "$PASSWD" ]; then
               PASSWD="$1"
@@ -544,26 +570,69 @@ while [ -n "$1" ]; do
           elif [ "$ACTION" = "show-pwd" ]; then
             echo "Unrecognized parameter ($1)" >&2
             exit 1
-          elif [ "$ACTION" = "destroy-user" ]; then
-            echo "Unrecognized parameter ($1)" >&2
-            exit 1
-          elif [ "$ACTION" = "show-users" ]; then
-            echo "Unrecognized parameter ($1)" >&2
-            exit 1
-          elif [ "$ACTION" = "add-user" ] || [ "$ACTION" = "del-user" ]; then
-            if [ -z "$USERNAME" ]; then
-              USERNAME="$1"
+          elif [ "$ACTION" = "add-key" ] || [ "$ACTION" = "del-key" ]; then
+            if [ -z "$KEY" ]; then
+              KEY="$1"
               shift
             else
               echo "Unrecognized parameter ($1)" >&2
               exit 1
             fi
-          elif [ "$ACTION" = "list-keys" ]; then
+          elif [ "$ACTION" = "user-set-admin" ]; then
+            if [ -z "$ADMIN" ] && echo "$1" | grep -q '^true\|false'; then
+              ADMIN="$1"
+              shift
+            else
+              echo "Unrecognized parameter ($1)" >&2
+              exit 1
+            fi
+          elif [ "$ACTION" = "user-is-admin" ]; then
             echo "Unrecognized parameter ($1)" >&2
             exit 1
-          elif [ "$ACTION" = "add-key" ] || [ "$ACTION" = "del-key" ]; then
-            if [ -z "$KEY" ]; then
-              KEY="$1"
+          elif [ "$ACTION" = "destroy-user" ]; then
+            echo "Unrecognized parameter ($1)" >&2
+            exit 1
+          elif [ "$ACTION" = "create" ]; then
+            if [ -z "$DESC" ]; then
+              DESC="$1"
+              shift
+            else
+              echo "Unrecognized parameter ($1)" >&2
+              exit 1
+            fi
+          elif [ "$ACTION" = "destroy" ]; then
+            echo "Unrecognized parameter ($1)" >&2
+            exit 1
+          elif [ "$ACTION" = "get" ] || [ "$ACTION" = "set" ]; then
+            if [ -z "$OPTION" ]; then
+              OPTION="$1"
+              shift
+            elif [ "$ACTION" = "set" ] && [ -z "$OPT_VAL" ]; then
+              OPT_VAL="$1"
+              shift
+            else
+              echo "Unrecognized parameter ($1)" >&2
+              exit 1
+            fi
+          elif [ "$ACTION" = "show-users" ]; then
+            echo "Unrecognized parameter ($1)" >&2
+            exit 1
+          elif [ "$ACTION" = "add-user" ]; then
+            if [ -z "$USERNAME" ]; then
+              USERNAME="$1"
+              shift
+            else
+              if [ -z "$RIGHT" ] && echo "$1" | grep -q '^admin\|user\|readonly'; then
+                RIGHT="$1"
+                shift
+              else
+                echo "Unrecognized parameter ($1)" >&2
+                exit 1
+              fi
+            fi
+          elif [ "$ACTION" = "del-user" ]; then
+            if [ -z "$USERNAME" ]; then
+              USERNAME="$1"
               shift
             else
               echo "Unrecognized parameter ($1)" >&2
@@ -621,6 +690,54 @@ case "$ACTION" in
     usage
     exit 1
     ;;
+  list-users)
+    list_users
+    ;;
+  create-user)
+    USERNAME="$NAME"
+    checkparams USERNAME PASSWD
+    create_user "$USERNAME" "$PASSWD" "$KEY"
+    ;;
+  change-user)
+    USERNAME="$NAME"
+    checkparams USERNAME PASSWD
+    change_user "$USERNAME" "$PASSWD"
+    ;;
+  show-pwd)
+    USERNAME="$NAME"
+    checkparams USERNAME
+    show_pwd "$USERNAME"
+    ;;
+  user-set-admin)
+    USERNAME="$NAME"
+    checkparams USERNAME ADMIN
+    user_set_admin "$USERNAME" "$ADMIN"
+    ;;
+  user-is-admin)
+    USERNAME="$NAME"
+    checkparams USERNAME
+    user_is_admin "$USERNAME"
+    ;;
+  list-keys)
+    USERNAME="$NAME"
+    checkparams USERNAME
+    list_keys "$USERNAME"
+    ;;
+  add-key)
+    USERNAME="$NAME"
+    checkparams USERNAME KEY
+    add_key "$USERNAME" "$KEY"
+    ;;
+  del-key)
+    USERNAME="$NAME"
+    checkparams USERNAME KEY
+    del_key "$USERNAME" "$KEY"
+    ;;
+  destroy-user)
+    USERNAME="$NAME"
+    checkparams USERNAME
+    destroy_user "$USERNAME"
+    ;;
   create)
     REPO="$NAME"
     checkparams REPO
@@ -641,29 +758,6 @@ case "$ACTION" in
     checkparams REPO OPTION
     set_option "$REPO" "$OPTION" "$OPT_VAL"
     ;;
-  list-users)
-    list_users "$REPO"
-    ;;
-  create-user)
-    USERNAME="$NAME"
-    checkparams USERNAME PASSWD
-    create_user "$USERNAME" "$PASSWD" "$KEY"
-    ;;
-  change-user)
-    USERNAME="$NAME"
-    checkparams USERNAME PASSWD
-    change_user "$USERNAME" "$PASSWD"
-    ;;
-  show-pwd)
-    USERNAME="$NAME"
-    checkparams USERNAME
-    show_pwd "$USERNAME"
-    ;;
-  destroy-user)
-    USERNAME="$NAME"
-    checkparams USERNAME
-    destroy_user "$USERNAME"
-    ;;
   show-users)
     REPO="$NAME"
     checkparams REPO
@@ -672,27 +766,13 @@ case "$ACTION" in
   add-user)
     REPO="$NAME"
     checkparams REPO USERNAME
-    add_user "$REPO" "$USERNAME"
+    [ -n "$RIGHT" ] || RIGHT=user
+    add_user "$REPO" "$USERNAME" "$RIGHT"
     ;;
   del-user)
     REPO="$NAME"
     checkparams REPO USERNAME
     del_user "$REPO" "$USERNAME"
-    ;;
-  list-keys)
-    USERNAME="$NAME"
-    checkparams USERNAME
-    list_keys "$USERNAME"
-    ;;
-  add-key)
-    USERNAME="$NAME"
-    checkparams USERNAME KEY
-    add_key "$USERNAME" "$KEY"
-    ;;
-  del-key)
-    USERNAME="$NAME"
-    checkparams USERNAME KEY
-    del_key "$USERNAME" "$KEY"
     ;;
   graph)
     REPO="$NAME"
