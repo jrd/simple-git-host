@@ -1,7 +1,7 @@
 <?php
 require_once('include.inc.php');
 if (empty($_GET['repo'])) {
-  header('Location: /');
+  header('Location: /' . $gitwebroot);
   exit;
 } else {
   $repo = $_GET['repo'];
@@ -34,7 +34,7 @@ if ($tags[0] == "") { $tags = array(); }
 exec("GIT_DIR=$gitdir/$repo.git git ls-tree -r --name-only -z refs/heads/$selectedBranch | xargs --null -if echo f", $files);
 ?>
     <div id="repo-toolbar">
-      <a href="/info/<?php echo $repo; ?>">Info</a>&nbsp;<a href="/histo/<?php echo $repo; ?>">Historique</a>
+      <a href="/<?php echo $gitwebroot;?>info/<?php echo $repo; ?>">Info</a>&nbsp;<a href="/<?php echo $gitwebroot;?>histo/<?php echo $repo; ?>">Historique</a>
     </div>
     <div id="repoinfo">
       <div class="info">
@@ -45,7 +45,7 @@ exec("GIT_DIR=$gitdir/$repo.git git ls-tree -r --name-only -z refs/heads/$select
         <div class="branches">
           <h2>Branches</h2>
           <label for"selected-branch">Branche actuelle :</label>
-          <select id="selected-branch" size="1" onchange="br=this.options[this.selectedIndex].value; location='/info/<?php echo $repo; ?>/' + br;">
+          <select id="selected-branch" size="1" onchange="br=this.options[this.selectedIndex].value; location='/<?php echo $gitwebroot;?>info/<?php echo $repo; ?>/' + br;">
             <?php foreach ($branchesMap as $branch => $def) {
               echo "<option value=\"$branch\"";
               if ($branch == $selectedBranch) {
@@ -62,7 +62,7 @@ exec("GIT_DIR=$gitdir/$repo.git git ls-tree -r --name-only -z refs/heads/$select
                 } else {
                   $branchHtml = $branch;
                 }
-                echo "<li>$branchHtml <a class=\"image\" href=\"/download_branch/$repo/$branch/$repo-$branch.tar.gz\"><img src=\"/package.png\"/></a></li>\n";
+                echo "<li>$branchHtml <a class=\"image\" href=\"/{$gitwebroot}download_branch/$repo/$branch/$repo-$branch.tar.gz\"><img src=\"/{$gitwebroot}package.png\"/></a></li>\n";
               }
             ?>
           </ul>      
@@ -72,7 +72,7 @@ exec("GIT_DIR=$gitdir/$repo.git git ls-tree -r --name-only -z refs/heads/$select
           <ul>
             <?php
               foreach ($tags as $tag) {
-                echo "<li>$tag <a class=\"image\" href=\"/download/$repo/$repo-$tag.tar.gz\"><img src=\"/package.png\"/></a></li>\n";
+                echo "<li>$tag <a class=\"image\" href=\"/{$gitwebroot}download/$repo/$repo-$tag.tar.gz\"><img src=\"/{$gitwebroot}package.png\"/></a></li>\n";
               }
             ?>
           </ul>      
@@ -82,7 +82,7 @@ exec("GIT_DIR=$gitdir/$repo.git git ls-tree -r --name-only -z refs/heads/$select
           <div class="rw"><?php echo "$gituser@$githost:$repo.git"; ?></div>
           <?php if (file_exists("$gitdir/$repo.git/git-daemon-export-ok")) { ?>
             <div class="ro-git"><?php echo "git://$githost/$repo.git"; ?></div>
-            <?php $httpurl = sprintf('%s://%s/git/%s.git', isset($_SERVER['HTTPS']) ? 'https' : 'http', $_SERVER['HTTP_HOST'], $repo); ?>
+            <?php $httpurl = sprintf("%s://%s/{$gitwebroot}readonly/%s.git", isset($_SERVER['HTTPS']) ? 'https' : 'http', $_SERVER['HTTP_HOST'], $repo); ?>
             <div class="ro-http"><?php echo "$httpurl"; ?></div>
           <?php } ?>
         </div>
@@ -93,9 +93,9 @@ exec("GIT_DIR=$gitdir/$repo.git git ls-tree -r --name-only -z refs/heads/$select
           <?php foreach ($files as $file) {
             $fileEncoded = urlencode($file);
             $fileHtml = htmlspecialchars($file);
-            echo "<a class=\"file-dl\" title=\"Télécharger $fileHtml\" href=\"/download_file/$repo/$selectedBranch/$fileEncoded/dl\"><strong>↓</strong>";
+            echo "<a class=\"file-dl\" title=\"Télécharger $fileHtml\" href=\"/{$gitwebroot}download_file/$repo/$selectedBranch/$fileEncoded/dl\"><strong>↓</strong>";
             echo "&nbsp;";
-            echo "<a class=\"file-show\" target=\"_blank\" title=\"Afficher $fileHtml\" href=\"/show_file/$repo/$selectedBranch/$fileEncoded/show\">$fileHtml</a></a><br/>\n";
+            echo "<a class=\"file-show\" target=\"_blank\" title=\"Afficher $fileHtml\" href=\"/{$gitwebroot}show_file/$repo/$selectedBranch/$fileEncoded/show\">$fileHtml</a></a><br/>\n";
           } ?>
         </div>
       </div>

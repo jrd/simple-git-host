@@ -1,10 +1,14 @@
 <?php
+require_once('include.inc.php');
 $queryString = $_SERVER['QUERY_STRING'];
 $uri = explode('?', $_SERVER['REQUEST_URI'])[0];
 $request = explode('/', $uri);
-$action = $request[1];
-$actionVars = array_slice($request, 2);
-require_once('include.inc.php');
+$posoffset = substr_count($gitwebroot, '/');
+$action = $request[1 + $posoffset];
+if ($action == 'controller.php') {
+  $action = '';
+}
+$actionVars = array_slice($request, 2 + $posoffset);
 require_once('controller.config.php');
 function call_action($name, $default, $vars) {
   if (empty($name)) {
@@ -18,6 +22,6 @@ function call_action($name, $default, $vars) {
 }
 if (!call_action($action, $defaultAction, $actionVars)) {
   header('HTTP/1.0 404 Not Found');
-  echo "404 Not found.";
+  echo "404 Not found ($action).";
 }
 ?>

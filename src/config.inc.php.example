@@ -1,6 +1,7 @@
 <?php
 $title = 'git.myhost.com';
 $githost = 'myhost.com';
+$gitwebroot = '';
 $gituser = 'git';
 $gitdir = '/home/git';
 $gitwebpath = 'gitweb';

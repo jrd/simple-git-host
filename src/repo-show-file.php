@@ -23,7 +23,7 @@ if (empty($_GET['filename'])) {
     if ($mime = 'inode/x-empty') {
       echo "<h3>Le fichier $filenameHtml est vide.</h3>";
     } else {
-      echo "<h3>Impossible d'afficher ${filenameHtml}.</h3><div><a href=\"/download_file/$repo/$branch/{$_GET['filename']}\">Cliquez ici pour le télécharger</a></div>";
+      echo "<h3>Impossible d'afficher ${filenameHtml}.</h3><div><a href=\"/{$gitwebroot}download_file/$repo/$branch/{$_GET['filename']}\">Cliquez ici pour le télécharger</a></div>";
     }
     echo "</body></html>";
   }

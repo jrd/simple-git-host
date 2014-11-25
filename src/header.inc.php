@@ -2,10 +2,10 @@
 <html>
   <head>
     <title><?php echo $title; ?></title>
-    <link rel="stylesheet" href="/style.css" type="text/css" />
-    <link rel="shortcut icon" href="/favicon.png" type="image/png"/>
+    <link rel="stylesheet" href="/<?php echo $gitwebroot;?>style.css" type="text/css" />
+    <link rel="shortcut icon" href="/<?php echo $gitwebroot;?>favicon.png" type="image/png"/>
     <!--[if lt IE 9]>
-    <script src="ie7/IE9.js"></script>
+    <script src="/<?php echo $gitwebroot;?>ie7/IE9.js"></script>
     <![endif]-->
   </head>
   <body>

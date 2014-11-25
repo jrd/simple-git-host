@@ -1,7 +1,7 @@
 <?php
 require_once('include.inc.php');
 if (!$logged) {
-  header('Location: /');
+  header('Location: /' . $gitwebroot);
   exit;
 } else {
   $username = $_SESSION['username'];
@@ -44,7 +44,7 @@ foreach ($keys as $key) {
   } else {
     $name = ' — ';
   }
-  $actions = "<a class=\"delete\" href=\"/delete_key/$i\" onclick=\"return confirm('Êtes vous sûr de vouloir supprimer cette clé ?');\">Supprimer</a>";
+  $actions = "<a class=\"delete\" href=\"/{$gitwebroot}delete_key/$i\" onclick=\"return confirm('Êtes-vous sûr de vouloir supprimer cette clé ?');\">Supprimer</a>";
   echo "        <tr><td class=\"keyname\">$name</td><td class=\"key\"><textarea readonly=\"readonly\">$key</textarea></td><td class=\"actions\">$actions</td></tr>\n";
 }
 ?>

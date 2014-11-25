@@ -1,1 +1,4 @@
-www
+git-master
+nginx.conf
+apache2.conf
+git-daemon.example

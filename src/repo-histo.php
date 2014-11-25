@@ -1,7 +1,7 @@
 <?php
 require_once('include.inc.php');
 if (empty($_GET['repo'])) {
-  header('Location: /');
+  header('Location: /' . $gitwebroot);
   exit;
 } else {
   $repo = $_GET['repo'];
@@ -10,7 +10,7 @@ $pageTitle = "$title - $repo";
 require('header.inc.php');
 ?>
     <div id="repo-toolbar">
-      <a href="/info/<?php echo $repo; ?>">Info</a>&nbsp;<a href="/histo/<?php echo $repo; ?>">Historique</a>
+      <a href="/<?php echo $gitwebroot;?>info/<?php echo $repo; ?>">Info</a>&nbsp;<a href="/<?php echo $gitwebroot;?>histo/<?php echo $repo; ?>">Historique</a>
     </div>
     <div id="histo">
       <div class="invite">Le graphe d'historique de <span><?php echo $repo; ?></span> :</div>

@@ -45,10 +45,10 @@ foreach ($files as $file) {
         $membre = "Non";
       }
     }
-    $actions = "<a href=\"/info/$proj\">Info</a>&nbsp;<a href=\"/users/$proj\">Utilisateurs</a>&nbsp;<a href=\"/histo/$proj\">Historique</a>";
+    $actions = "<a href=\"/{$gitwebroot}info/$proj\">Info</a>&nbsp;<a href=\"/{$gitwebroot}users/$proj\">Utilisateurs</a>&nbsp;<a href=\"/{$gitwebroot}histo/$proj\">Historique</a>";
     if ($admin) {
-      $actions .= "&nbsp;<a class=\"edit\" href=\"/edit/$proj\">Éditer</a>";
-      $actions .= "&nbsp;<a class=\"delete\" href=\"/delete/$proj\" onclick=\"return confirm('Êtes vous sûr de vouloir supprimer le dépôt \'$proj\' ?');\">Supprimer</a>";
+      $actions .= "&nbsp;<a class=\"edit\" href=\"/{$gitwebroot}edit/$proj\">Éditer</a>";
+      $actions .= "&nbsp;<a class=\"delete\" href=\"/{$gitwebroot}delete/$proj\" onclick=\"return confirm('Êtes-vous sûr de vouloir supprimer le dépôt \'$proj\' ?');\">Supprimer</a>";
     }
     $name = $proj;
     $exportok = file_exists("$gitdir/$file/git-daemon-export-ok");
@@ -59,7 +59,7 @@ foreach ($files as $file) {
     echo "<div class=\"rw\">$gituser@$githost:$file</div>";
     if ($exportok) {
       echo "<div class=\"ro-git\">git://$githost/$file</div>";
-      $httpurl = sprintf('%s://%s/git/%s', isset($_SERVER['HTTPS']) ? 'https' : 'http', $_SERVER['HTTP_HOST'], $file);
+      $httpurl = sprintf("%s://%s/{$gitwebroot}readonly/%s", isset($_SERVER['HTTPS']) ? 'https' : 'http', $_SERVER['HTTP_HOST'], $file);
       echo "<div class=\"ro-http\">$httpurl</div>";
     }
     echo "</td><td class=\"member\">$membre</td><td class=\"actions\">$actions</td></tr>\n";
@@ -89,6 +89,6 @@ foreach ($files as $file) {
         </table>
       </fieldset>
     </form>
-    <a href="/manage_users">Gestion des utilisateurs</a>
+    <a href="/<?php echo $gitwebroot;?>manage_users">Gestion des utilisateurs</a>
 <?php } ?>
 <?php require('footer.inc.php'); ?>

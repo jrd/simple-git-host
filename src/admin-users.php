@@ -23,7 +23,7 @@ require('header.inc.php');
 <?php
 $users = gitrepoinfo('list-users');
 foreach ($users as $user) {
-  $actions = "<a class=\"delete\" href=\"/delete_user/$user\" onclick=\"return confirm('Êtes vous sûr de vouloir supprimer l\'utilisateur \'$user\' ?');\">Supprimer</a>";
+  $actions = "<a class=\"delete\" href=\"/{$gitwebroot}delete_user/$user\" onclick=\"return confirm('Êtes-vous sûr de vouloir supprimer l\'utilisateur \'$user\' ?');\">Supprimer</a>";
   echo "        <tr><td class=\"name\">$user</td><td class=\"actions\">$actions</td></tr>\n";
 }
 ?>

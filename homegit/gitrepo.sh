@@ -377,7 +377,8 @@ EOF
   fi
   if [ ! -f "$NAME".git/.sshwrapper ]; then
     cat <<'EOF' > "$NAME".git/.sshwrapper
-ssh \
+#!/bin/sh
+exec ssh \
   -o UserKnownHostsFile=/dev/null \
   -o StrictHostKeyChecking=no \
   -o LogLevel=ERROR \

@@ -33,13 +33,13 @@ function isadmin($user) {
 function redirectifnotadmin() {
   global $admin;
   if (!$admin) {
-    header('Location: /');
+    header('Location: /' . $gitwebroot);
     exit;
   }
 }
 
 function auth() {
-  global $errorMsg, $logged, $admin;
+  global $errorMsg, $logged, $admin, $gitwebroot;
   if (isset($_POST['submit_auth'])) {
     $fUsername = $_POST['username'];
     $fPassword = $_POST['password'];
@@ -64,7 +64,7 @@ function auth() {
       // Test si l'utilisateur est admin
       $admin = isadmin($_SESSION['username']);
       // Redirige pour éviter de reposter le formulaire.
-      header('Location: /');
+      header('Location: /' . $gitwebroot);
       exit;
     }
   } else {

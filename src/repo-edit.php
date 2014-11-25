@@ -2,7 +2,7 @@
 require_once('include.inc.php');
 redirectifnotadmin();
 if (empty($_GET['repo'])) {
-  header('Location: /');
+  header('Location: /' . $gitwebroot);
   exit;
 } else {
   $repo = $_GET['repo'];
@@ -45,7 +45,7 @@ if (isset($_POST['submit_repo_desc'])) {
 } else if (isset($_GET['delete']) && $_GET['delete'] == 'syncto') {
   $fUrl = $_GET['url'];
   $res = gitrepoinfo('unsync', $repo, 'to', $fUrl);
-  header("Location: /edit/$repo");
+  header("Location: /{$gitwebroot}edit/$repo");
 } else if (isset($_POST['submit_repo_syncfrom_add'])) {
   $fUrl = $_POST['new-syncfrom-url'];
   $res = gitrepoinfo('sync', $repo, 'from', $fUrl);
@@ -55,7 +55,7 @@ if (isset($_POST['submit_repo_desc'])) {
 } else if (isset($_GET['delete']) && $_GET['delete'] == 'syncfrom') {
   $fUrl = $_GET['url'];
   $res = gitrepoinfo('unsync', $repo, 'from', $fUrl);
-  header("Location: /edit/$repo");
+  header("Location: /{$gitwebroot}edit/$repo");
 }
 $pageTitle = "$title - Configuration de $repo";
 require('header.inc.php');
@@ -114,7 +114,7 @@ require('header.inc.php');
   foreach ($urls as $url) {
     echo "        <tr>\n";
     echo "          <td class=\"name\">$url</td>\n";
-    echo "          <td class=\"actions\"><a class=\"delete\" href=\"?delete=syncto&url=$url\" onclick=\"return confirm('Êtes vous sûr de vouloir supprimer cette url ?');\">Supprimer</a></td>\n";
+    echo "          <td class=\"actions\"><a class=\"delete\" href=\"?delete=syncto&url=$url\" onclick=\"return confirm('Êtes-vous sûr de vouloir supprimer cette url ?');\">Supprimer</a></td>\n";
     echo "        </tr>\n";
   }
 ?>
@@ -149,12 +149,12 @@ require('header.inc.php');
   foreach ($urls as $url) {
     echo "        <tr>\n";
     echo "          <td class=\"name\">$url</td>\n";
-    echo "          <td class=\"actions\"><a class=\"delete\" href=\"?delete=syncfrom&url=$url\" onclick=\"return confirm('Êtes vous sûr de vouloir supprimer cette url ?');\">Supprimer</a></td>\n";
+    echo "          <td class=\"actions\"><a class=\"delete\" href=\"?delete=syncfrom&url=$url\" onclick=\"return confirm('Êtes-vous sûr de vouloir supprimer cette url ?');\">Supprimer</a></td>\n";
     echo "        </tr>\n";
   }
 ?>
       </table>
-      <p>Url to trigger synchronization: <a class="text" href="/post-update.php">post-update.php</a></p>
+      <p>Url to trigger synchronization: <a class="text" href="/<?php echo $gitwebroot;?>post-update.php">post-update.php</a></p>
       <form id="repo-syncfrom-add" action="" method="POST">
         <fieldset>
           <legend>Ajouter une URL depuis laquelle se synchroniser</legend>

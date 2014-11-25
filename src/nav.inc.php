@@ -1,9 +1,9 @@
 <div id="nav">
-  <p class="breadcrumbs"><a href="/">Index</a></p>
+<p class="breadcrumbs"><a href="/<?php echo $gitwebroot;?>">Index</a></p>
 <?php
 if ($logged) {
   echo "<p>Vous êtes connecté en tant que <span>" . $_SESSION['username'] . "</span><br/>\n";
-  echo "<a href=\"/account\">Mon compte</a>&nbsp;<a href=\"/disconnect\">Se déconnecter</a></p>\n";
+  echo "<a href=\"/{$gitwebroot}account\">Mon compte</a>&nbsp;<a href=\"/{$gitwebroot}disconnect\">Se déconnecter</a></p>\n";
 } else {
   echo "<div class=\"error\">$errorMsg</div>\n";
   echo <<<EOF
