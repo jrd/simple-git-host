@@ -21,13 +21,8 @@ function gitrepoinfo($params) {
 }
 
 function isadmin($user) {
-  $admins = file('.admins');
-  if ($admins !== false) {
-    $admins = array_map('trim', $admins);
-    return in_array($user, $admins);
-  } else {
-    return false;
-  }
+  $res = gitrepoinfo('user-is-admin', $user);
+  return ($res !== false);
 }
 
 function redirectifnotadmin() {

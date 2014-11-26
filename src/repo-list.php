@@ -1,7 +1,7 @@
 <?php
 require_once('include.inc.php');
 $errorMsg = '';
-if ($admin && isset($_POST['submit_repo'])) {
+if ($logged && isset($_POST['submit_repo'])) {
   $fRepo = $_POST['new-repo'];
   $fDesc = $_POST['new-desc'];
   $res = gitrepoinfo('create', $fRepo, $fDesc);
@@ -11,7 +11,8 @@ if ($admin && isset($_POST['submit_repo'])) {
     if (isset($_POST['new-export']) && $_POST['new-export'] == 'on') {
       gitrepoinfo('export', $fRepo, 'on');
     }
-    gitrepoinfo('add-user', $fRepo, $_SESSION['username']); # add current user to the newly created repo.
+    # add current user as admin to the newly created repo.
+    gitrepoinfo('add-user', $fRepo, $_SESSION['username'], 'admin');
   }
 }
 $pageTitle = $title;
@@ -68,7 +69,7 @@ foreach ($files as $file) {
 ?>
       </table>
     </div>
-<?php if ($admin) { ?>
+<?php if ($logged) { ?>
     <div class="error"><?php echo $errorMsg; ?></div>
     <form id="repo-add" action="" method="POST">
       <fieldset>
@@ -89,6 +90,8 @@ foreach ($files as $file) {
         </table>
       </fieldset>
     </form>
+<?php } ?>
+<?php if ($admin) { ?>
     <a href="/<?php echo $gitwebroot;?>manage_users">Gestion des utilisateurs</a>
 <?php } ?>
 <?php require('footer.inc.php'); ?>

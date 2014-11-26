@@ -28,6 +28,7 @@ gen/sudoers.d:
 
 gen/sudoers.d/git:
 	@sed "s,__WEB_USER__,${WEB_USER},; s,__GIT_USER__,${GIT_USER},; s,__GIT_HOME__,${GIT_HOME},;" tpl/git.sudo > $@
+	@visudo -c -f $@ || cat /dev/null > $@
 
 gen/www/$(WEB_BASE_DIR)config.inc.php:
 	@echo '<?php' > $@
@@ -57,6 +58,7 @@ gen/.website: gen/home gen/www/$(WEB_BASE_DIR) gen/sudoers.d gen/sudoers.d/git g
 	@cp -r src/* src/.??* gen/www/${WEB_BASE_DIR}
 	(cd git-master/gitweb && make prefix=/usr GITWEB_PROJECTROOT=${GIT_HOME} GITWEB_PROJECT_MAXDEPTH=50 GITWEB_EXPORT_OK=git-daemon-export-ok GITWEB_HOME_LINK_STR=/${WEB_BASE_DIR} GITWEB_SITENAME="${WEB_TITLE}" gitwebdir=${PREFIX}/${WEB_BASE_DIR}${GITWEB_DIR} all)
 	@touch $@
+	@echo "Run 'make install' to install the git repositories and the web site"
 
 clean:
 	@rm -rf gen
@@ -64,6 +66,14 @@ clean:
 
 install: _root gen/.website _githome _webhome _sudo
 	(cd git-master/gitweb && make prefix=/usr GITWEB_PROJECTROOT=${GIT_HOME} GITWEB_PROJECT_MAXDEPTH=50 GITWEB_EXPORT_OK=git-daemon-export-ok GITWEB_HOME_LINK_STR=/${WEB_BASE_DIR} GITWEB_SITENAME="${WEB_TITLE}" gitwebdir=${PREFIX}/${WEB_BASE_DIR}${GITWEB_DIR} install)
+	@echo ""
+	@echo "Installation complete."
+	@echo ""
+	@echo "Please configure your web server using gen/${WEB_TYPE}.conf."
+	@echo "A git-daemon example script is also available in gen/git-daemon.example."
+	@echo "  Adapt it to your OS service system."
+	@echo ""
+	@echo "/!\ Don't forget to create a new admin user using: make adminuser"
 
 _root:
 	@if [ $$(id -u) -ne 0 ]; then echo "You need to be root."; exit 1; fi
@@ -80,4 +90,9 @@ _sudo:
 	@cp gen/sudoers.d/git /etc/sudoers.d/git
 	@chmod ug=r,o= /etc/sudoers.d/git
 
-.PHONY: all _options clean install _root _githome _webhome _sudo
+adminuser: _root
+	@echo "New admin user creation"
+	@echo ""
+	@sh -c 'echo -n "Username: "; read gituser; echo -n "Password: ";	read -s gitpass; gitpass=$$(echo "$$gitpass"|md5sum|cut -d" " -f1); sudo -u ${GIT_USER} ${GIT_HOME}/gitrepo.sh create-user $$gituser $$gitpass; sudo -u ${GIT_USER} ${GIT_HOME}/gitrepo.sh user-set-admin $$gituser true'
+
+.PHONY: all _options clean install _root _githome _webhome _sudo adminuser

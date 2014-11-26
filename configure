@@ -37,6 +37,7 @@ OPTIONS:
 EOF
 }
 
+CMD="$0"' '"$@"
 while [ -n "$1" ] && [ "$1" != "--" ]; do
   ARG="$1"
   shift
@@ -100,22 +101,23 @@ if [ ! -d "$LOGS" ]; then
   exit 2
 fi
 LOGS=$(readlink -f "$LOGS")
-if echo "$GIT_HOSTPORT"|grep -vq '^[0-9]\+$'; then
+if echo "$GIT_HOSTPORT"|grep -v -q '^[0-9]\+$'; then
   echo "Git host port $GIT_HOSTPORT does not seems to be valid." >&2
   exit 2
 fi
 GIT_HOME=$(readlink -f "$GIT_HOME")
-if [ -n "$WEB_BASE_DIR" ] && echo "$WEB_BASE_DIR"|grep -vq '/$'; then
+if [ -n "$WEB_BASE_DIR" ] && echo "$WEB_BASE_DIR"|grep -v -q '/$'; then
   WEB_BASE_DIR="$WEB_BASE_DIR/"
 fi
 GITWEB_DIR=$(echo "$GITWEB_DIR"|sed 's,/$,,')
-if grep -vq "^$WEB_USER:" /etc/passwd; then
+if ! grep -q "^$WEB_USER:" /etc/passwd; then
   echo "Web user '$WEB_USER' does not exist" >&2
   exit 2
 fi
 
 cd $(dirname "$0")
 cat <<EOF > config.mk
+# $CMD
 PREFIX = $PREFIX
 LOGS = $LOGS
 WEB_BASE_DIR = $WEB_BASE_DIR
