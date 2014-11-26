@@ -27,7 +27,7 @@ gen/sudoers.d:
 	@mkdir -p $@
 
 gen/sudoers.d/git:
-	@sed "s,WEB_USER,${WEB_USER},; s,GIT_USER,${GIT_USER},; s,GIT_DIR,${GIT_DIR},;" sudoers.d/git > $@
+	@sed "s,__WEB_USER__,${WEB_USER},; s,__GIT_USER__,${GIT_USER},; s,__GIT_HOME__,${GIT_HOME},;" tpl/git.sudo > $@
 
 gen/www/$(WEB_BASE_DIR)config.inc.php:
 	@echo '<?php' > $@
@@ -66,22 +66,15 @@ install: _root gen/.website _githome _webhome _sudo
 	(cd git-master/gitweb && make prefix=/usr GITWEB_PROJECTROOT=${GIT_HOME} GITWEB_PROJECT_MAXDEPTH=50 GITWEB_EXPORT_OK=git-daemon-export-ok GITWEB_HOME_LINK_STR=/${WEB_BASE_DIR} GITWEB_SITENAME="${WEB_TITLE}" gitwebdir=${PREFIX}/${WEB_BASE_DIR}${GITWEB_DIR} install)
 
 _root:
-	@[ $$(id -u) -ne 0 ] && "You need to be root." && exit 1
+	@if [ $$(id -u) -ne 0 ]; then echo "You need to be root."; exit 1; fi
 
 _githome:
-	@if grep -q "^${GIT_USER}:" /etc/passwd; then
-		@usermod -s /usr/bin/git-shell -L ${GIT_USER}
-		@usermod -a -G $$(groups ${GIT_USER}|cut -d: -f2-|awk '{print $$1}') ${WEB_USER}
-	@else
-		@useradd -d ${GIT_HOME} -m -r -s /usr/bin/git-shell -U ${GIT_USER}
-		@usermod -a -G ${GIT_USER} ${WEB_USER}
-	@fi
+	@if grep -q "^${GIT_USER}:" /etc/passwd; then usermod -s /usr/bin/git-shell -L ${GIT_USER}; usermod -a -G $$(groups ${GIT_USER}|cut -d: -f2-|awk '{print $$1}') ${WEB_USER}; else useradd -d ${GIT_HOME} -m -r -s /usr/bin/git-shell -U ${GIT_USER}; usermod -a -G ${GIT_USER} ${WEB_USER}; fi
 	@cp -rv gen/home/* ${GIT_HOME}/
 	
 _webhome:
 	@mkdir -p ${PREFIX}
-	@cp -rv gen/www/ ${PREFIX}/
-	@chown -R ${WEB_USER}: ${PREFIX}/${WEB_BASE_DIR}
+	@cp -rv gen/www/* ${PREFIX}/
 
 _sudo:
 	@cp gen/sudoers.d/git /etc/sudoers.d/git
