@@ -132,3 +132,4 @@ WEB_TITLE = $WEB_TITLE
 EOF
 
 [ -d git-master ] || wget https://github.com/git/git/archive/master.tar.gz -O - | tar xzf -
+sed -i 's/^GITWEB_SITE_HEADER =/& header.html/; s/^GITWEB_SITE_FOOTER =/& footer.html/;' git-master/gitweb/Makefile

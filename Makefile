@@ -57,6 +57,7 @@ gen/.website: gen/home gen/www/$(WEB_BASE_DIR) gen/sudoers.d gen/sudoers.d/git g
 	@cp -r homegit/* gen/home/
 	@cp -r src/* src/.??* gen/www/${WEB_BASE_DIR}
 	(cd git-master/gitweb && make prefix=/usr GITWEB_PROJECTROOT=${GIT_HOME} GITWEB_PROJECT_MAXDEPTH=50 GITWEB_EXPORT_OK=git-daemon-export-ok GITWEB_HOME_LINK_STR=/${WEB_BASE_DIR} GITWEB_SITENAME="${WEB_TITLE}" gitwebdir=${PREFIX}/${WEB_BASE_DIR}${GITWEB_DIR} all)
+	@for h in header footer indextext; do sed -r 's,__WEB_TITLE__,${WEB_TITLE},g; s,__PREFIX__,${PREFIX},g; s,__WEB_BASE_DIR__,${WEB_BASE_DIR},g; s,__GITWEB_DIR__,${GITWEB_DIR},g; s,__GIT_HOSTNAME__,${GIT_HOSTNAME},g; s,__GIT_HOSTPORT__,${GIT_HOSTPORT},g;' tpl/$$h.html > gen/$$h.html; done
 	@touch $@
 	@echo "Run 'make install' to install the git repositories and the web site"
 
@@ -66,6 +67,7 @@ clean:
 
 install: _root gen/.website _githome _webhome _sudo
 	(cd git-master/gitweb && make prefix=/usr GITWEB_PROJECTROOT=${GIT_HOME} GITWEB_PROJECT_MAXDEPTH=50 GITWEB_EXPORT_OK=git-daemon-export-ok GITWEB_HOME_LINK_STR=/${WEB_BASE_DIR} GITWEB_SITENAME="${WEB_TITLE}" gitwebdir=${PREFIX}/${WEB_BASE_DIR}${GITWEB_DIR} install)
+	@cp -v gen/*.html ${PREFIX}/${WEB_BASE_DIR}${GITWEB_DIR}/
 	@echo ""
 	@echo "Installation complete."
 	@echo ""
@@ -79,7 +81,7 @@ _root:
 	@if [ $$(id -u) -ne 0 ]; then echo "You need to be root."; exit 1; fi
 
 _githome:
-	@if grep -q "^${GIT_USER}:" /etc/passwd; then usermod -s /usr/bin/git-shell -L ${GIT_USER}; usermod -a -G $$(groups ${GIT_USER}|cut -d: -f2-|awk '{print $$1}') ${WEB_USER}; else useradd -d ${GIT_HOME} -m -r -s /usr/bin/git-shell -U ${GIT_USER}; usermod -a -G ${GIT_USER} ${WEB_USER}; fi
+	@if grep -q "^${GIT_USER}:" /etc/passwd; then usermod -s /usr/bin/git-shell -p '*' ${GIT_USER}; usermod -a -G $$(groups ${GIT_USER}|cut -d: -f2-|awk '{print $$1}') ${WEB_USER}; else useradd -d ${GIT_HOME} -m -r -s /usr/bin/git-shell -p '*' -U ${GIT_USER}; usermod -a -G ${GIT_USER} ${WEB_USER}; fi
 	@cp -rv gen/home/* ${GIT_HOME}/
 	
 _webhome:

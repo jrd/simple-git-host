@@ -66,8 +66,17 @@ table th {
   text-align: center !important;
   height: 30px;
 }
+table tr {
+  border-bottom: 1px gray dashed;
+}
+table tr:first-child {
+  border-bottom: 1px black solid;
+}
 table tr:hover {
   background-color: #CCC;
+}
+table tr td {
+  padding: 10px 0;
 }
 #nav {
   padding: 5px 0 5px 20px;

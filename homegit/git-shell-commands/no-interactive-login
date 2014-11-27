@@ -1,0 +1,4 @@
+#!/bin/sh
+printf '%s\n' "Hi $USER"
+printf '%s\n' "You've successfully authenticated, but no shell is provided."
+exit 128

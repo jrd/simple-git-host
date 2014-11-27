@@ -1,15 +1,56 @@
 #!/bin/sh
 GITUSER="$1"
+if [ -z "$SSH_ORIGINAL_COMMAND" ]; then
+  USER=$GITUSER
+  export USER
+  exec git-shell
+fi
+ispublic() {
+  [ -e "$1"/git-daemon-export-ok ]
+}
+rungitcmd() {
+  exec /usr/bin/git-shell -c "$SSH_ORIGINAL_COMMAND"
+}
+error() {
+  echo "Error: $1" >&2
+  exit 1
+}
 eval set -- $SSH_ORIGINAL_COMMAND
 # $1 = command
 # $2 = repo path
+CMD="$1"
 REPO="$2"
+PUSHCMD="git-receive-pack"
 if [ -d "$REPO" ] && [ -r "$REPO"/.users ]; then
-  if grep -q "^$GITUSER\$" "$REPO"/.users; then
-    eval "$@"
+  if grep -q "^$GITUSER:.*\$" "$REPO"/.users; then
+    RIGHT=$(sed -r -n "/^$GITUSER:/{s/^$GITUSER:(.*)/\1/;p}" "$REPO"/.users)
+    case $RIGHT in
+      admin|user)
+        # admin and regular user have the same right on the git repo
+        rungitcmd
+        ;;
+      readonly)
+        if [ "$CMD" = "$PUSHCMD" ]; then
+          # push command is forbidden to readonly users
+          error "$GITUSER not authorized to push on $REPO"
+        else
+          # other commands are allowed
+          rungitcmd
+        fi
+        ;;
+      *)
+        error "$GITUSER has the unexpected right $RIGHT"
+    esac
   else
-    echo "Error: $GITUSER not authorized on $REPO" >&2
+    if [ "$CMD" != "$PUSHCMD" ] && [ -e "$REPO"/git-daemon-export-ok ]; then
+      rungitcmd
+    else
+      # not a member and the command is push or
+      # not a member and the repo is not public
+      error "$GITUSER not authorized on $REPO"
+    fi
   fi
 else
-  eval "$@"
+  # will fail as the repo does not exist
+  rungitcmd
 fi
