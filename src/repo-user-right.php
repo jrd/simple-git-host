@@ -1,6 +1,7 @@
 <?php
 require_once('include.inc.php');
-if (!$logged || empty($_GET['repo']) || empty($_GET['user'])) {
+$right = $_GET['right'] or '';
+if (!$logged || empty($_GET['repo']) || empty($_GET['user']) || ($right != 'admin' && $right != 'user' && $right != 'readonly')) {
   header('Location: /' . $gitwebroot);
   exit;
 } else {
@@ -8,5 +9,5 @@ if (!$logged || empty($_GET['repo']) || empty($_GET['user'])) {
   $user = $_GET['user'];
 }
 redirectifnotrepoadmin($repo);
-$res = gitrepoinfo('del-user', $repo, $user);
+$res = gitrepoinfo('add-user', $repo, $user, $right);
 header("Location: /{$gitwebroot}users/$repo");

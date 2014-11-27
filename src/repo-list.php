@@ -37,17 +37,37 @@ foreach ($files as $file) {
     if (empty($desc) || preg_match('/^Unnamed repository;/', $desc)) {
       $desc = $proj;
     }
-    $users = array_map(function($val) { return explode(':', $val)[0]; }, gitrepoinfo('show-users', $proj));
-    $membre = count($users) > 0 ? '<span title="Veuillez vous identifier"> ? </span>' : '<span title="Aucun utilisateur"> — </span>';
-    if ($logged && count($users) > 0) {
-      if (in_array($_SESSION['username'], $users)) {
-        $membre = "Oui";
-      } else {
-        $membre = "Non";
+    if ($logged) {
+      $right = 'no';
+      foreach (gitrepoinfo('show-users', $proj) as $userinfo) {
+        $info = explode(':', $userinfo);
+        if ($info[0] == $_SESSION['username']) {
+          $right = $info[1];
+          break;
+        }
       }
+    } else {
+      $right = null;
+    }
+    switch ($right) {
+      case 'admin':
+        $member = 'Admin';
+        break;
+      case 'user':
+        $member = 'Oui';
+        break;
+      case 'readonly':
+        $member = 'Readonly';
+        break;
+      case 'no':
+        $member = 'Non';
+        break;
+      default:
+        $member = '<span title="Veuillez vous identifier"> ? </span>';
+        break;
     }
     $actions = "<a href=\"/{$gitwebroot}info/$proj\">Info</a>&nbsp;<a href=\"/{$gitwebroot}users/$proj\">Utilisateurs</a>&nbsp;<a href=\"/{$gitwebroot}histo/$proj\">Historique</a>";
-    if ($admin) {
+    if ($admin || $right == 'admin') {
       $actions .= "&nbsp;<a class=\"edit\" href=\"/{$gitwebroot}edit/$proj\">Éditer</a>";
       $actions .= "&nbsp;<a class=\"delete\" href=\"/{$gitwebroot}delete/$proj\" onclick=\"return confirm('Êtes-vous sûr de vouloir supprimer le dépôt \'$proj\' ?');\">Supprimer</a>";
     }
@@ -63,7 +83,7 @@ foreach ($files as $file) {
       $httpurl = sprintf("%s://%s/{$gitwebroot}readonly/%s", isset($_SERVER['HTTPS']) ? 'https' : 'http', $_SERVER['HTTP_HOST'], $file);
       echo "<div class=\"ro-http\">$httpurl</div>";
     }
-    echo "</td><td class=\"member\">$membre</td><td class=\"actions\">$actions</td></tr>\n";
+    echo "</td><td class=\"member\">$member</td><td class=\"actions\">$actions</td></tr>\n";
   }
 }
 ?>

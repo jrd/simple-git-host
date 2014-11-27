@@ -25,9 +25,29 @@ function isadmin($user) {
   return ($res !== false);
 }
 
+function isrepoadmin($repo, $user) {
+  $isadmin = false;
+  foreach (gitrepoinfo('show-users', $repo) as $userinfo) {
+    $info = explode(':', $userinfo);
+    if ($info[0] == $user) {
+      $isadmin = ($info[1] == 'admin');
+      break;
+    }
+  }
+  return $isadmin;
+}
+
 function redirectifnotadmin() {
-  global $admin;
+  global $admin, $gitwebroot;
   if (!$admin) {
+    header('Location: /' . $gitwebroot);
+    exit;
+  }
+}
+
+function redirectifnotrepoadmin($repo) {
+  global $logged, $admin, $gitwebroot;
+  if (!$logged || (!$admin && !isrepoadmin($repo, $_SESSION['username']))) {
     header('Location: /' . $gitwebroot);
     exit;
   }

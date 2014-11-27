@@ -54,6 +54,7 @@ table .address {
   text-align: left;
 }
 table .member,
+table .right,
 table .actions {
   text-align: center;
 }

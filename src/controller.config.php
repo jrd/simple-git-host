@@ -145,6 +145,19 @@ function action_download_file($args) {
   }
 }
 
+function action_user_right($args) {
+  if (count($args) == 3 && !empty($args[0]) && !empty($args[1]) && !empty($args[2])) {
+    extract($GLOBALS);
+    $_GET['repo'] = $args[0];
+    $_GET['user'] = $args[1];
+    $_GET['right'] = $args[2];
+    include_once('repo-user-right.php');
+    return true;
+  } else {
+    return false;
+  }
+}
+
 function action_remove_user($args) {
   if (count($args) == 2 && !empty($args[0]) && !empty($args[1])) {
     extract($GLOBALS);

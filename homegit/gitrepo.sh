@@ -304,7 +304,7 @@ add_user() {
   fi
   [ -e "$REPO".git/.users ] || touch "$REPO".git/.users
   if grep -q "^$USERNAME:.*" "$REPO".git/.users; then
-    sed -i -r "s/^$USERNAME:.*/$USERNAME:$RIGHT" "$REPO".git/.users
+    sed -i -r "s/^$USERNAME:.*/$USERNAME:$RIGHT/" "$REPO".git/.users
   else
     echo "$USERNAME:$RIGHT" >> "$REPO".git/.users
   fi
@@ -332,7 +332,7 @@ show_users() {
     exit 2
   fi
   if [ -f "$REPO".git/.users ]; then
-    cat "$REPO".git/.users
+    sort -t: -k 2 -k 1 "$REPO".git/.users
   fi
 }
 

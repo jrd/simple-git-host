@@ -1,12 +1,12 @@
 <?php
 require_once('include.inc.php');
-redirectifnotadmin();
 if (empty($_GET['repo'])) {
   header('Location: /' . $gitwebroot);
   exit;
 } else {
   $repo = $_GET['repo'];
 }
+redirectifnotrepoadmin($repo);
 $errorMsgDesc = '';
 $errorMsgConfig = '';
 $errorMsgExport = '';
