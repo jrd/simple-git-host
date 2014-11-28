@@ -15,11 +15,8 @@ error() {
   echo "Error: $1" >&2
   exit 1
 }
-eval set -- $SSH_ORIGINAL_COMMAND
-# $1 = command
-# $2 = repo path
-CMD="$1"
-REPO="$2"
+CMD=$(echo "$SSH_ORIGINAL_COMMAND" | cut -d' ' -f1)
+REPO=$(echo "$SSH_ORIGINAL_COMMAND" | cut -d' ' -f2)
 PUSHCMD="git-receive-pack"
 if [ -d "$REPO" ] && [ -r "$REPO"/.users ]; then
   if grep -q "^$GITUSER:.*\$" "$REPO"/.users; then
