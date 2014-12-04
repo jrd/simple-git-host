@@ -1,0 +1,19 @@
+body {
+  padding-top: 70px;
+}
+.inverse-dropdown {
+  background-color: #222;
+  border-color: #080808;
+}
+.inverse-dropdown>li>a {
+  color: #999;
+}
+.inverse-dropdown>li>a:hover,
+.inverse-dropdown>li>a:focus {
+  color: #fff;
+  background-color: #000;
+  background-image: none;
+}
+.inverse-dropdown>.divider {
+  background-color: #000;
+}

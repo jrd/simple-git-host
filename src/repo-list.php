@@ -1,6 +1,5 @@
 <?php
 require_once('include.inc.php');
-$errorMsg = '';
 if ($logged && isset($_POST['submit_repo'])) {
   $fRepo = $_POST['new-repo'];
   $fDesc = $_POST['new-desc'];

@@ -58,8 +58,9 @@ function auth() {
   if (isset($_POST['submit_auth'])) {
     $fUsername = $_POST['username'];
     $fPassword = $_POST['password'];
-    $password = implode('', gitrepoinfo('show-pwd', $fUsername));
+    $password = gitrepoinfo('show-pwd', $fUsername);
     if ($password !== false) {
+      $password = implode('', $password);
       if (empty($password)) {
         // autorisé
         $_SESSION['username'] = $fUsername;
