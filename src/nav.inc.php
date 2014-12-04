@@ -54,7 +54,7 @@ foreach ($files as $file) {
       </form> 
 <?php } ?>
     </div>
-    <?php if ($errorMsg) { ?><div class="alert alert-danger alert-dismissible pull-right" role="alert"><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>&nbsp;<?php echo $errorMsg; ?><button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button></div><?php } ?>
   </div>
 </nav>
 <div class="container">
+  <?php if ($errorMsg) { ?><div class="alert alert-danger alert-dismissible pull-right" role="alert"><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>&nbsp;<?php echo $errorMsg; ?><button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button></div><?php } ?>

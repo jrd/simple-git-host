@@ -11,8 +11,7 @@ body {
 .inverse-dropdown>li>a:hover,
 .inverse-dropdown>li>a:focus {
   color: #fff;
-  background-color: #000;
-  background-image: none;
+  background: none;
 }
 .inverse-dropdown>.divider {
   background-color: #000;
