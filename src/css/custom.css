@@ -1,5 +1,24 @@
 body {
   padding-top: 70px;
+  padding-bottom: 40px;
+}
+ul.nav > li > a:focus {
+  outline: none;
+}
+.footer {
+  padding-top: 5px;
+  border-top: 1px solid #333;
+  max-height: 40px;
+}
+.footer li {
+  color: #9D9D9D;
+}
+.footer a {
+  color: #539AD7;
+}
+.footer a:hover,
+.footer a:focus {
+  color: #73BAF7;
 }
 .inverse-dropdown {
   background-color: #222;
@@ -15,4 +34,38 @@ body {
 }
 .inverse-dropdown>.divider {
   background-color: #000;
+}
+.table-hover > tbody > tr:hover {
+  background-color: #DDEEFF;
+}
+a.file-dl,
+a.file-dl:hover {
+  text-decoration: none;
+}
+a.download-branch img,
+a.download-tag img {
+  width: 16px;
+  height: 16px;
+}
+div.uri {
+  color: black;
+}
+div.uri:hover {
+  color: #337AB7;
+}
+div.uri::before,
+div.uri:hover:before {
+  color: #333;
+}
+div.uri-ssh:before {
+  content: "Member clone: ";
+  font-size: 0.8em;
+}
+div.uri-git:before {
+  content: "Public clone: ";
+  font-size: 0.8em;
+}
+div.uri-http:before {
+  content: "Public clone: ";
+  font-size: 0.8em;
 }

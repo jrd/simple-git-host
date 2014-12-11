@@ -1,13 +1,11 @@
 <?php
 require_once('include.inc.php');
-if (empty($_GET['repo'])) {
-  header('Location: /' . $gitwebroot);
-  exit;
+if (empty($vars['repo'])) {
+  redirect('/');
 } else {
-  $repo = $_GET['repo'];
+  $repo = $vars['repo'];
 }
-$errorMsg = '';
-$repoadmin = $admin || isrepoadmin($repo, $_SESSION['username']);
+$repoadmin = $admin || isrepoadmin($repo, $username);
 if ($repoadmin && isset($_POST['submit_user_add'])) {
   $fUser = $_POST['username'];
   $fRight = $_POST['right'];
@@ -18,15 +16,22 @@ if ($repoadmin && isset($_POST['submit_user_add'])) {
 }
 $pageTitle = "$title - Membres de $repo";
 require('header.inc.php');
+$repo_tab_active = 'admin';
+$exportok = file_exists("$gitdir/$repo.git/git-daemon-export-ok");
+require('repo-nav.inc.php');
 ?>
     <div id="users">
-      <div class="invite">Les membres de <span><?php echo $repo; ?></span> :</div>
-      <table>
-        <tr>
-          <th class="name">Utilisateur</th>
-          <th class="right">Droit</th>
-          <th class="actions">Actions</th>
-        </tr>
+      <h3>Les membres de <strong><?php echo $repo; ?></strong> :</h3>
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Utilisateur</th>
+              <th>Droit</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
 <?php
 $members = array();
 foreach (gitrepoinfo('show-users', $repo) as $userinfo) {
@@ -37,18 +42,19 @@ $isExport = file_exists("$gitdir/$repo.git/git-daemon-export-ok");
 foreach ($members as $user => $right) {
   $actions = ' — ';
   if ($repoadmin) {
-    $actions = "<a href=\"/{$gitwebroot}user_right/$repo/$user/admin\">→ admin right</a>";
-    $actions .= "&nbsp;<a href=\"/{$gitwebroot}user_right/$repo/$user/user\">→ user right</a>";
-    $actions .= "&nbsp;<a href=\"/{$gitwebroot}user_right/$repo/$user/readonly\">→ readonly right</a>";
-    $actions .= "&nbsp;<a href=\"/{$gitwebroot}remove_user/$repo/$user\">Retirer</a>";
+    $actions = '<a href="' . url('repo-user-right', 'repo', $repo, 'user', $user, 'right', 'admin') . '">→ admin right</a>';
+    $actions .= '&nbsp;<a href="' . url('repo-user-right', 'repo', $repo, 'user', $user, 'right', 'user') . '">→ user right</a>';
+    $actions .= '&nbsp;<a href="' . url('repo-user-right', 'repo', $repo, 'user', $user, 'right', 'readonly') . '">→ readonly right</a>';
+    $actions .= '&nbsp;<a href="' . url('repo-user-del', 'repo', $repo, 'user', $user) . '">Retirer</a>';
   }
-  echo "        <tr><td class=\"name\">$user</td><td class=\"right\">$right</td><td class=\"actions\">$actions</td></tr>\n";
+  echo "        <tr><td>$user</td><td>$right</td><td class=\"actions\">$actions</td></tr>\n";
 }
 ?>
-      </table>
+          </tbody>
+        </table>
+      </div>
     </div>
 <?php if ($repoadmin) { ?>
-    <div class="error"><?php echo $errorMsg; ?></div>
     <form id="repo-add-user" action="" method="POST">
       <fieldset>
         <legend>Ajouter un utilisateur au dépôt</legend>

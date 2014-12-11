@@ -1,11 +1,9 @@
 <?php
 require_once('include.inc.php');
-if (!$logged || empty($_GET['pos'])) {
-  header('Location: /' . $gitwebroot);
-  exit;
+if (!$logged || empty($vars['pos'])) {
+  redirect('/');
 } else {
-  $username = $_SESSION['username'];
-  $pos = $_GET['pos'];
+  $pos = $vars['pos'];
 }
 $res = gitrepoinfo('del-key', $username, $pos);
-header("Location: /${gitwebroot}account");
+redirect('account');

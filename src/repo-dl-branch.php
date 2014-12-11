@@ -1,13 +1,13 @@
 <?php
 require_once('include.inc.php');
-if (empty($_GET['filename'])) {
+if (empty($vars['filename'])) {
   header('HTTP/1.0 404 Not Found');
   exit;
 } else {
-  $repo = $_GET['repo'];
-  $branch = $_GET['branch'];
-  $filename = $_GET['filename'];
-  $ret = preg_match("/^{$repo}-{$branch}.tar.(gz|xz)\$/", $filename, $options);
+  $repo = $vars['repo'];
+  $branch = $vars['branch'];
+  $filename = $vars['filename'];
+  $ret = preg_match("/^$repo-$branch\.tar\.(gz|xz)\$/", $filename, $options);
   if ($ret == 0) {
     header('HTTP/1.0 404 Not Found');
     exit;

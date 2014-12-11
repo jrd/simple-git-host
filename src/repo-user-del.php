@@ -1,12 +1,11 @@
 <?php
 require_once('include.inc.php');
-if (!$logged || empty($_GET['repo']) || empty($_GET['user'])) {
-  header('Location: /' . $gitwebroot);
-  exit;
+if (!$logged || empty($vars['repo']) || empty($vars['user'])) {
+  redirect('/');
 } else {
-  $repo = $_GET['repo'];
-  $user = $_GET['user'];
+  $repo = $vars['repo'];
+  $user = $vars['user'];
 }
 redirectifnotrepoadmin($repo);
 $res = gitrepoinfo('del-user', $repo, $user);
-header("Location: /{$gitwebroot}users/$repo");
+redirect('repo-users', 'repo', $repo);

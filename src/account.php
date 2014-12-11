@@ -1,38 +1,46 @@
 <?php
 require_once('include.inc.php');
 if (!$logged) {
-  header('Location: /' . $gitwebroot);
-  exit;
-} else {
-  $username = $_SESSION['username'];
+  redirect('/');
 }
-$errorMsgKey = '';
-$errorMsgPwd = '';
+$redirect = false;
 if (isset($_POST['submit_key'])) {
   $fKey = $_POST['new-key'];
   $res = gitrepoinfo('add-key', $username, $fKey);
   if ($res === false) {
-    $errorMsgKey = "La clé n'a pas pu être ajoutée.";
+    $errorMsg = "La clé n'a pas pu être ajoutée.";
+  } else {
+    $redirect = true;
   }
 }
 if (isset($_POST['submit_pwd'])) {
   $fPwd = $_POST['new-pwd'];
   $res = gitrepoinfo('change-user', $username, md5($fPwd));
   if ($res === false) {
-    $errorMsgPwd = "Le mot de passe n'a pas pu être changé.";
+    $errorMsg = "Le mot de passe n'a pas pu être changé.";
+  } else {
+    $redirect = true;
   }
 }
+if ($redirect) {
+  redirecturl($_SERVER['REQUEST_URI']);
+}
 $pageTitle = "$title - $username";
+$cat = 'account';
 require('header.inc.php');
 ?>
     <div id="keys">
       <div class="invite">Les clés SSH de <span><?php echo $username; ?> </span>:</div>
-      <table>
-        <tr>
-          <th class="name">Nom</th>
-          <th class="key">Clé</th>
-          <th class="actions">Action</th>
-        </tr>
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Nom</th>
+              <th>Clé</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
 <?php
 $keys = gitrepoinfo('list-keys', $username);
 $i = 0;
@@ -44,13 +52,14 @@ foreach ($keys as $key) {
   } else {
     $name = ' — ';
   }
-  $actions = "<a class=\"delete\" href=\"/{$gitwebroot}delete_key/$i\" onclick=\"return confirm('Êtes-vous sûr de vouloir supprimer cette clé ?');\">Supprimer</a>";
-  echo "        <tr><td class=\"keyname\">$name</td><td class=\"key\"><textarea readonly=\"readonly\">$key</textarea></td><td class=\"actions\">$actions</td></tr>\n";
+  $actions = '<a class="delete" href="' . url('user-del-key', 'pos', $i) . '" onclick="return confirm(\'Êtes-vous sûr de vouloir supprimer cette clé ?\');">Supprimer</a>';
+  echo "        <tr><td>$name</td><td><textarea readonly=\"readonly\">$key</textarea></td><td class=\"actions\">$actions</td></tr>\n";
 }
 ?>
-      </table>
+          </tbody>
+        </table>
+      </div>
     </div>
-    <div class="error"><?php echo $errorMsgKey; ?></div>
     <form id="add-key" action="" method="POST">
       <fieldset>
         <legend>Ajouter une clé SSH</legend>
@@ -59,7 +68,6 @@ foreach ($keys as $key) {
         <input type="submit" name="submit_key" value="Ajouter"/>
       </fieldset>
     </form>
-    <div class="error"><?php echo $errorMsgPwd; ?></div>
     <form id="change-pwd" action="" method="POST" autocomplete="off">
       <fieldset>
         <legend>Changer le mot de passe</legend>

@@ -1,10 +1,9 @@
 <?php
 require_once('include.inc.php');
-if (empty($_GET['repo'])) {
-  header('Location: /' . $gitwebroot);
-  exit;
+if (empty($vars['repo'])) {
+  redirect('/');
 } else {
-  $repo = $_GET['repo'];
+  $repo = $vars['repo'];
 }
 redirectifnotrepoadmin($repo);
 $errorMsgDesc = '';
@@ -12,11 +11,14 @@ $errorMsgConfig = '';
 $errorMsgExport = '';
 $errorMsgSyncTo = '';
 $errorMsgSyncFrom = '';
+$redirect = false;
 if (isset($_POST['submit_repo_desc'])) {
   $fDesc = $_POST['new-desc'];
   $res = gitrepoinfo('set', $repo, 'description', $fDesc);
   if ($res === false) {
     $errorMsgDesc = "La description n'a pas pu être appliquée.";
+  } else {
+    $redirect = true;
   }
 } else if (isset($_POST['submit_repo_config'])) {
   $fOption = $_POST['new-option'];
@@ -24,41 +26,58 @@ if (isset($_POST['submit_repo_desc'])) {
   $res = gitrepoinfo('set', $repo, $fOption, $fValue);
   if ($res === false) {
     $errorMsgConfig = "L'option n'a pas pu être appliquée.";
+  } else {
+    $redirect = true;
   }
 } else if (isset($_POST['submit_repo_export'])) {
   $fExport = $_POST['new-export'] == 'on' ? 'on' : 'off';
   $res = gitrepoinfo('export', $repo, $fExport);
   if ($res === false) {
     $errorMsgExport = "L'export n'a pas pu être appliqué.";
+  } else {
+    $redirect = true;
   }
 } else if (isset($_POST['submit_repo_syncto_add'])) {
   $fUrl = $_POST['new-syncto-url'];
   $res = gitrepoinfo('sync', $repo, 'to', $fUrl);
   if ($res === false) {
     $errorMsgSyncTo = "L'url n'a pas pu être ajoutée.";
+  } else {
+    $redirect = true;
   }
 } else if (isset($_POST['submit_repo_syncto_deploy'])) {
   $res = gitrepoinfo('deploy-key', $repo);
   if ($res === false) {
     $errorMsgSyncTo = "La clé de déploiement n'a pas pu être ajoutée.";
+  } else {
+    $redirect = true;
   }
 } else if (isset($_GET['delete']) && $_GET['delete'] == 'syncto') {
   $fUrl = $_GET['url'];
   $res = gitrepoinfo('unsync', $repo, 'to', $fUrl);
-  header("Location: /{$gitwebroot}edit/$repo");
+  $redirect = true;
 } else if (isset($_POST['submit_repo_syncfrom_add'])) {
   $fUrl = $_POST['new-syncfrom-url'];
   $res = gitrepoinfo('sync', $repo, 'from', $fUrl);
   if ($res === false) {
     $errorMsgSyncFrom = "L'url n'a pas pu être ajoutée.";
+  } else {
+    $redirect = true;
   }
 } else if (isset($_GET['delete']) && $_GET['delete'] == 'syncfrom') {
   $fUrl = $_GET['url'];
   $res = gitrepoinfo('unsync', $repo, 'from', $fUrl);
-  header("Location: /{$gitwebroot}edit/$repo");
+  $redirect = true;
+}
+if ($redirect) {
+  redirecturl($_SERVER['REQUEST_URI']);
 }
 $pageTitle = "$title - Configuration de $repo";
 require('header.inc.php');
+$repo_tab_active = 'admin';
+$exportok = file_exists("$gitdir/$repo.git/git-daemon-export-ok");
+$repoadmin = true;
+require('repo-nav.inc.php');
 ?>
     <div id="desc">
       <div class="error"><?php echo $errorMsgDesc; ?></div>

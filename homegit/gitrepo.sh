@@ -32,6 +32,8 @@ Action is one of:
  - add-user Name Username [admin|user|readonly]
    Username should already exists
    Default right is user
+ - user-right Name Username
+   Return admin, user, readonly or an empty string
  - del-user Name Username
  
  - graph Name
@@ -310,6 +312,20 @@ add_user() {
   fi
 }
 
+user_right() {
+  REPO="$1"
+  USERNAME="$2"
+  check_repo "$REPO"
+  check_username "$USERNAME"
+  if [ ! -d "$REPO".git ]; then
+    echo "$REPO does not exist." >&2
+    exit 2
+  fi
+  if [ -e "$REPO".git/.users ]; then
+    sed -r -n "/^$USERNAME:/ { s/.*:(.*)/\1/; p }" "$REPO".git/.users
+  fi
+}
+
 del_user() {
   REPO="$1"
   USERNAME="$2"
@@ -530,7 +546,7 @@ while [ -n "$1" ]; do
       ;;
     *)
       if [ -z "$ACTION" ]; then
-        if echo "$1" | grep -q '^\(list-users\|create-user\|change-user\|show-pwd\|user-set-admin\|user-is-admin\|list-keys\|add-key\|del-key\|destroy-user\|create\|destroy\|get\|set\|show-users\|add-user\|del-user\|graph\|fetch\|export\|sync\|unsync\|listsync\|deploy-key\)$'; then
+        if echo "$1" | grep -q '^\(list-users\|create-user\|change-user\|show-pwd\|user-set-admin\|user-is-admin\|list-keys\|add-key\|del-key\|destroy-user\|create\|destroy\|get\|set\|show-users\|add-user\|user-right\|del-user\|graph\|fetch\|export\|sync\|unsync\|listsync\|deploy-key\)$'; then
           ACTION="$1"
           shift
         else
@@ -629,6 +645,14 @@ while [ -n "$1" ]; do
                 echo "Unrecognized parameter ($1)" >&2
                 exit 1
               fi
+            fi
+          elif [ "$ACTION" = "user-right" ]; then
+            if [ -z "$USERNAME" ]; then
+              USERNAME="$1"
+              shift
+            else
+              echo "Unrecognized parameter ($1)" >&2
+              exit 1
             fi
           elif [ "$ACTION" = "del-user" ]; then
             if [ -z "$USERNAME" ]; then
@@ -768,6 +792,11 @@ case "$ACTION" in
     checkparams REPO USERNAME
     [ -n "$RIGHT" ] || RIGHT=user
     add_user "$REPO" "$USERNAME" "$RIGHT"
+    ;;
+  user-right)
+    REPO="$NAME"
+    checkparams REPO USERNAME
+    user_right "$REPO" "$USERNAME"
     ;;
   del-user)
     REPO="$NAME"

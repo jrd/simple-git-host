@@ -1,11 +1,10 @@
 <?php
 require_once('include.inc.php');
 redirectifnotadmin();
-if (!$logged || empty($_GET['user'])) {
-  header('Location: /' . $gitwebroot);
-  exit;
+if (!$logged || empty($vars['user'])) {
+  redirect('/');
 } else {
-  $user = $_GET['user'];
+  $user = $vars['user'];
 }
 $res = gitrepoinfo('destroy-user', $user);
-header("Location: /${gitwebroot}admin_users");
+redirect('admin-users');

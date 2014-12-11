@@ -1,19 +1,19 @@
 <?php
 require_once('include.inc.php');
-if (empty($_GET['repo'])) {
-  header('Location: /' . $gitwebroot);
-  exit;
+if (empty($vars['repo'])) {
+  redirect('/');
 } else {
-  $repo = $_GET['repo'];
+  $repo = $vars['repo'];
 }
 $pageTitle = "$title - $repo";
 require('header.inc.php');
+$repo_tab_active = 'histo';
+$repoadmin = $admin || isrepoadmin($repo, $username);
+$exportok = file_exists("$gitdir/$repo.git/git-daemon-export-ok");
+require('repo-nav.inc.php');
 ?>
-    <div id="repo-toolbar">
-      <a href="/<?php echo $gitwebroot;?>info/<?php echo $repo; ?>">Info</a>&nbsp;<a href="/<?php echo $gitwebroot;?>histo/<?php echo $repo; ?>">Historique</a>
-    </div>
     <div id="histo">
-      <div class="invite">Le graphe d'historique de <span><?php echo $repo; ?></span> :</div>
+      <h3>Le graphe d'historique de <strong><?php echo $repo; ?></strong> :</h3>
       <pre>
 <?php
   $grapheArray = gitrepoinfo('graph', $repo);
