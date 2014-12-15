@@ -86,7 +86,7 @@ _githome:
 	
 _webhome:
 	@mkdir -p ${PREFIX}
-	@cp -rv gen/www/* ${PREFIX}/
+	@cp -rv gen/www/. ${PREFIX}/
 
 _sudo:
 	@cp gen/sudoers.d/git /etc/sudoers.d/git

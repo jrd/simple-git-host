@@ -18,8 +18,13 @@ function _getvars($args, $offset) {
   return $vars;
 }
 
-function url($name, $vars) {
+function url($name) {
   global $controllers, $gitwebroot;
+  if (func_num_args() > 1) {
+    $vars = func_get_arg(1);
+  } else {
+    $vars = null;
+  }
   if ($vars !== null && !is_array($vars)) {
     $vars = _getvars(func_get_args(), 1);
   }
@@ -38,7 +43,12 @@ function url($name, $vars) {
   }
   return $url;
 }
-function purl($name, $vars) {
+function purl($name) {
+  if (func_num_args() > 1) {
+    $vars = func_get_arg(1);
+  } else {
+    $vars = null;
+  }
   if ($vars !== null && !is_array($vars)) {
     $vars = _getvars(func_get_args(), 1);
   }
@@ -88,7 +98,12 @@ function redirectifnotrepoadmin($repo) {
     redirect('/');
   }
 }
-function redirect($name, $vars) {
+function redirect($name) {
+  if (func_num_args() > 1) {
+    $vars = func_get_arg(1);
+  } else {
+    $vars = null;
+  }
   if ($vars !== null && !is_array($vars)) {
     $vars = _getvars(func_get_args(), 1);
   }

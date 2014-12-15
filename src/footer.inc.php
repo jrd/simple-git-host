@@ -12,7 +12,7 @@
     </div>
     <script type="text/javascript" src="/<?php echo $gitwebroot;?>js/jquery.min.js"></script>
     <script type="text/javascript" src="/<?php echo $gitwebroot;?>js/bootstrap.min.js"></script>
-    <?php foreach ($extrajs as $js) { ?>
+    <?php if (!isset($extrajs)) { $extrajs = array(); } foreach ($extrajs as $js) { ?>
     <script type="text/javascript" src="<?php echo $js;?>"></script>
     <?php } ?>
   </body>

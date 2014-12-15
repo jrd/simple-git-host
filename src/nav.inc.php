@@ -14,19 +14,27 @@
         <?php
 $files = scandir($gitdir);
 $nb = 0;
+$nbdeleted = 0;
 foreach ($files as $file) {
-  if ($file[0] == '.') continue;
   if (is_dir("$gitdir/$file") && preg_match('/\.git$/', $file)) {
-    if ($admin || file_exists("$gitdir/$file/git-daemon-export-ok")) {
-      $nb++;
-    } elseif ($logged) {
-      $repo = substr($file, 0, -4);
-      $right = gitrepoinfo('user-right', $repo, $username);
-      if ($right !== false) {
-        $right = implode('', $right);
+    if ($file[0] == '.') {
+      if ($admin) {
+        $nbdeleted++;
+      } else {
+        continue;
       }
-      if (!empty($right)) {
+    } else {
+      if ($admin || file_exists("$gitdir/$file/git-daemon-export-ok")) {
         $nb++;
+      } elseif ($logged) {
+        $repo = substr($file, 0, -4);
+        $right = gitrepoinfo('user-right', $repo, $username);
+        if ($right !== false) {
+          $right = implode('', $right);
+        }
+        if (!empty($right)) {
+          $nb++;
+        }
       }
     }
   }
@@ -38,8 +46,11 @@ if (empty($cat)) {
   $cat = 'repos';
 }
         ?>
-        <li role="presentation" class="<?php echo $cat == 'repos' ? 'active' : '';?>"><a href="<?php purl('repo-list');?>"><span class="glyphicon glyphicon-home" aria-hidden="true"></span>&nbsp;&nbsp;Repositories <span class="badge"><?php echo $nb; ?></span></a></li>
+        <li role="presentation" class="<?php echo $cat == 'repos' ? 'active' : '';?>"><a href="<?php purl('repo-list');?>"><span class="glyphicon glyphicon-home" aria-hidden="true"></span>&nbsp;&nbsp;Repositories&nbsp;<span class="badge"><?php echo $nb; ?></span></a></li>
         <?php if ($admin) { ?>
+        <?php if ($nbdeleted > 0) { ?>
+        <li role="presentation" class="<?php echo $cat == 'repos-deleted' ? 'active' : '';?>"><a href="<?php purl('repo-deleted-list');?>"><span class="glyphicon glyphicon-fire" aria-hidden="true"></span>&nbsp;&nbsp;Deleted&nbsp;<span class="badge"><?php echo $nbdeleted; ?></span></a></li>
+        <?php } ?>
         <li role="presentation" class="<?php echo $cat == 'users' ? 'active' : '';?>"><a href="<?php purl('admin-users')?>"><span class="glyphicon glyphicon-user" aria-hidden="true"></span>&nbsp;&nbsp;Gestion des utilisateurs</a></li>
         <?php } ?>
         <li role="presentation" class="<?php echo $cat == 'about' ? 'active' : '';?>"><a href="<?php purl('about')?>"><span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>&nbsp;&nbsp;About</a></li>

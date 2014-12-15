@@ -15,7 +15,7 @@
     <ul class="dropdown-menu" role="menu">
       <li role="presentation"><a href="<?php purl('repo-users', 'repo', $repo); ?>"><span class="glyphicon glyphicon-user" aria-hidden="true"></span>&nbsp;&nbsp;Utilisateurs</a></li>
       <li role="presentation" <?php if (!$repoadmin) { echo 'class="disabled"'; } ?>><?php echo $repoadmin ? '<a href="'.url('repo-edit', 'repo', $repo).'">' : '<a href="javascript:">'; ?><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>&nbsp;&nbsp;Éditer</a></li>
-      <li role="presentation" <?php if (!$repoadmin) { echo 'class="disabled"'; } ?>><?php echo $repoadmin ? '<a href="'.url('repo-del', 'repo', $repo).'" onclick="return confirm(\'Êtes-vous sûr de vouloir supprimer le dépôt '."'$repo'".' ?\');">' : '<a href="javascript:">'; ?><span class="glyphicon glyphicon-trash" aria-hidden="true"></span>&nbsp;&nbsp;Supprimer</a></li>
+      <li role="presentation" <?php if (!$repoadmin) { echo 'class="disabled"'; } ?>><?php echo $repoadmin ? '<a href="'.url('repo-del', 'repo', $repo).'" onclick="return confirm(\'Êtes-vous sûr de vouloir supprimer le dépôt '."\'$repo\'".' ?\');">' : '<a href="javascript:">'; ?><span class="glyphicon glyphicon-trash" aria-hidden="true"></span>&nbsp;&nbsp;Supprimer</a></li>
     </ul>
   </li>
 </ul>

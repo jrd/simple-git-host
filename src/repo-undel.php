@@ -6,5 +6,5 @@ if (!$logged || empty($vars['repo'])) {
 } else {
   $repo = $vars['repo'];
 }
-$res = gitrepoinfo('delete', $repo);
+$res = gitrepoinfo('undelete', $repo);
 redirect('repo-list');

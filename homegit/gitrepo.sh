@@ -21,6 +21,8 @@ Action is one of:
  - destroy-user Username
  
  - create Name [Description]
+ - delete Name
+ - undelete Name
  - destroy Name
  - get Name Option
    Option can be
@@ -239,14 +241,39 @@ create_repo() {
   )
 }
 
-destroy_repo() {
+delete_repo() {
   REPO="$1"
   check_repo "$REPO"
   if [ ! -d "$REPO".git ]; then
     echo "$REPO does not exist." >&2
     exit 2
   fi
-  rm -rf "$REPO".git
+  mv "$REPO".git ."$REPO".git
+}
+
+undelete_repo() {
+  REPO="$1"
+  check_repo "$REPO"
+  if [ ! -d ."$REPO".git ]; then
+    echo "$REPO cannot be undeleted, not found." >&2
+    exit 2
+  fi
+  mv ."$REPO".git "$REPO".git
+}
+
+destroy_repo() {
+  REPO="$1"
+  check_repo "$REPO"
+  if [ ! -d ."$REPO".git ]; then
+    if [ -d "$REPO".git ]; then
+      echo "$REPO should be deleted before being destroyed." >&2
+      exit 2
+    else
+      echo "$REPO does not exist." >&2
+      exit 2
+    fi
+  fi
+  rm -rf ."$REPO".git
 }
 
 get_option() {
@@ -546,7 +573,7 @@ while [ -n "$1" ]; do
       ;;
     *)
       if [ -z "$ACTION" ]; then
-        if echo "$1" | grep -q '^\(list-users\|create-user\|change-user\|show-pwd\|user-set-admin\|user-is-admin\|list-keys\|add-key\|del-key\|destroy-user\|create\|destroy\|get\|set\|show-users\|add-user\|user-right\|del-user\|graph\|fetch\|export\|sync\|unsync\|listsync\|deploy-key\)$'; then
+        if echo "$1" | grep -q '^\(list-users\|create-user\|change-user\|show-pwd\|user-set-admin\|user-is-admin\|list-keys\|add-key\|del-key\|destroy-user\|create\|delete\|undelete\|destroy\|get\|set\|show-users\|add-user\|user-right\|del-user\|graph\|fetch\|export\|sync\|unsync\|listsync\|deploy-key\)$'; then
           ACTION="$1"
           shift
         else
@@ -616,7 +643,7 @@ while [ -n "$1" ]; do
               echo "Unrecognized parameter ($1)" >&2
               exit 1
             fi
-          elif [ "$ACTION" = "destroy" ]; then
+          elif [ "$ACTION" = "delete" ] || [ "$ACTION" = "undelete" ] || [ "$ACTION" = "destroy" ]; then
             echo "Unrecognized parameter ($1)" >&2
             exit 1
           elif [ "$ACTION" = "get" ] || [ "$ACTION" = "set" ]; then
@@ -766,6 +793,16 @@ case "$ACTION" in
     REPO="$NAME"
     checkparams REPO
     create_repo "$REPO" "$DESC"
+    ;;
+  delete)
+    REPO="$NAME"
+    checkparams REPO
+    delete_repo "$REPO"
+    ;;
+  undelete)
+    REPO="$NAME"
+    checkparams REPO
+    undelete_repo "$REPO"
     ;;
   destroy)
     REPO="$NAME"
