@@ -85,7 +85,7 @@ require('repo-nav.inc.php');
         <div class="panel panel-default">
           <div class="panel-heading">URL</div>
           <div class="panel-body">
-            <div class="uri uri-ssh"><?php echo "$gituser@$githost:$repo.git"; ?></div>
+          <?php if ($logged) { ?><div class="uri uri-ssh"><?php echo "$gituser@$githost:$repo.git"; ?></div><?php } ?>
             <?php if (file_exists("$gitdir/$repo.git/git-daemon-export-ok")) { ?>
               <div class="uri uri-git"><?php echo "git://$githost/$repo.git"; ?></div>
               <?php $httpurl = sprintf("%s://%s/{$gitwebroot}readonly/%s.git", isset($_SERVER['HTTPS']) ? 'https' : 'http', $_SERVER['HTTP_HOST'], $repo); ?>

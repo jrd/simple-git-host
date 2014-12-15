@@ -29,7 +29,7 @@ require('header.inc.php');
 <?php
 $users = gitrepoinfo('list-users');
 foreach ($users as $user) {
-  $actions = "<a href=\"".url('user-del', 'user', $user)."\" onclick=\"return confirm('Êtes-vous sûr de vouloir supprimer l\'utilisateur \'$user\' ?');\">Supprimer</a>";
+  $actions = "<a href=\"".url('user-del', 'user', $user)."\" onclick=\"return confirm('Êtes-vous sûr de vouloir supprimer l\'utilisateur \'$user\' ?');\"><span class=\"glyphicon glyphicon-trash\" aria-hidden=\"true\"></span>&nbsp;Supprimer</a>";
   echo "        <tr><td>$user</td><td class=\"actions\">$actions</td></tr>\n";
 }
 ?>

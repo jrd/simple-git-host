@@ -90,12 +90,14 @@ foreach ($files as $file) {
     }
     $actions .= "&nbsp;<a href=\"".url('repo-users', 'repo', $proj)."\"><span class=\"glyphicon glyphicon-user\" aria-hidden=\"true\"></span>&nbsp;Utilisateurs</a>";
     if ($admin || $right == 'admin') {
-      $actions .= "&nbsp;<a class=\"edit\" href=\"".url('repo-edit', 'repo', $proj)."\"><span class=\"glyphicon glyphicon-pencil\" aria-hidden=\"true\"></span>&nbsp;Éditer</a>";
-      $actions .= "&nbsp;<a class=\"delete\" href=\"".url('repo-del', 'repo', $proj)."\" onclick=\"return confirm('Êtes-vous sûr de vouloir supprimer le dépôt \'$proj\' ?');\"><span class=\"glyphicon glyphicon-trash\" aria-hidden=\"true\"></span>&nbsp;Supprimer</a>";
+      $actions .= "&nbsp;<a href=\"".url('repo-edit', 'repo', $proj)."\"><span class=\"glyphicon glyphicon-pencil\" aria-hidden=\"true\"></span>&nbsp;Éditer</a>";
+      $actions .= "&nbsp;<a href=\"".url('repo-del', 'repo', $proj)."\" onclick=\"return confirm('Êtes-vous sûr de vouloir supprimer le dépôt \'$proj\' ?');\"><span class=\"glyphicon glyphicon-trash\" aria-hidden=\"true\"></span>&nbsp;Supprimer</a>";
     }
     $name = $proj;
     echo "        <tr><td title=\"$desc\"><a href=\"".url('repo-info', 'repo', $proj)."\">$name</a></td><td class=\"address\">";
-    echo "<div class=\"uri uri-ssh\">$gituser@$githost:$file</div>";
+    if ($logged) {
+      echo "<div class=\"uri uri-ssh\">$gituser@$githost:$file</div>";
+    }
     if ($exportok) {
       echo "<div class=\"uri uri-git\">git://$githost/$file</div>";
       $httpurl = sprintf("%s://%s/{$gitwebroot}readonly/%s", isset($_SERVER['HTTPS']) ? 'https' : 'http', $_SERVER['HTTP_HOST'], $file);

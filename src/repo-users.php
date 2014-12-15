@@ -22,16 +22,15 @@ require('repo-nav.inc.php');
 ?>
     <div id="users">
       <h3>Les membres de <strong><?php echo $repo; ?></strong> :</h3>
-      <div class="table-responsive">
-        <table class="table table-hover">
-          <thead>
-            <tr>
-              <th>Utilisateur</th>
-              <th>Droit</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>Utilisateur</th>
+            <th>Droit</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
 <?php
 $members = array();
 foreach (gitrepoinfo('show-users', $repo) as $userinfo) {
@@ -40,19 +39,20 @@ foreach (gitrepoinfo('show-users', $repo) as $userinfo) {
 }
 $isExport = file_exists("$gitdir/$repo.git/git-daemon-export-ok");
 foreach ($members as $user => $right) {
+  $rightlabel = $right;
   $actions = ' — ';
-  if ($repoadmin) {
-    $actions = '<a href="' . url('repo-user-right', 'repo', $repo, 'user', $user, 'right', 'admin') . '">→ admin right</a>';
-    $actions .= '&nbsp;<a href="' . url('repo-user-right', 'repo', $repo, 'user', $user, 'right', 'user') . '">→ user right</a>';
-    $actions .= '&nbsp;<a href="' . url('repo-user-right', 'repo', $repo, 'user', $user, 'right', 'readonly') . '">→ readonly right</a>';
-    $actions .= '&nbsp;<a href="' . url('repo-user-del', 'repo', $repo, 'user', $user) . '">Retirer</a>';
+  if ($repoadmin && ($admin || $user != $username)) {
+    $rightlabel = '<div class="dropdown"><a class="dropdown-toggle" aria_expended="false" role="button" data-toggle="dropdown" href="#">' . $right . '&nbsp;<span class="caret"></a><ul class="dropdown-menu" role="menu">';
+    $rightlabel .= '<li role="presentation"><a href="' . url('repo-user-right', 'repo', $repo, 'user', $user, 'right', 'admin') . '">admin</a></li>';
+    $rightlabel .= '<li role="presentation"><a href="' . url('repo-user-right', 'repo', $repo, 'user', $user, 'right', 'user') . '">user</a></li>';
+    $rightlabel .= '<li role="presentation"><a href="' . url('repo-user-right', 'repo', $repo, 'user', $user, 'right', 'readonly') . '">readonly</a></li>';
+    $actions = '<a href="' . url('repo-user-del', 'repo', $repo, 'user', $user) . '"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span>&nbsp;Retirer</a>';
   }
-  echo "        <tr><td>$user</td><td>$right</td><td class=\"actions\">$actions</td></tr>\n";
+  echo "        <tr><td>$user</td><td>$rightlabel</td><td class=\"actions\">$actions</td></tr>\n";
 }
 ?>
-          </tbody>
-        </table>
-      </div>
+        </tbody>
+      </table>
     </div>
 <?php if ($repoadmin) { ?>
     <form id="repo-add-user" action="" method="POST">
