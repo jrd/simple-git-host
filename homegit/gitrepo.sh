@@ -471,8 +471,8 @@ exec ssh \
   -i $(dirname "$0")/id_rsa \
   "$@"
 EOF
-    chmod +x "$NAME".git/sshwrapper
   fi
+  chmod +x "$NAME".git/sshwrapper
   echo 'GIT_SSH=$(readlink -f $(dirname "$0")/../../.sshwrapper) git push --quiet'" $HOST &" > "$NAME".git/hooks/.post-update.d/$HOST
   chmod +x "$NAME".git/hooks/.post-update.d/$HOST
 }
