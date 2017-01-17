@@ -95,6 +95,6 @@ _sudo:
 adminuser: _root
 	@echo "New admin user creation"
 	@echo ""
-	@sh -c 'echo -n "Username: "; read gituser; echo -n "Password: ";	read -s gitpass; gitpass=$$(echo -n "$$gitpass"|md5sum|cut -d" " -f1); sudo -u ${GIT_USER} ${GIT_HOME}/gitrepo.sh create-user $$gituser $$gitpass; sudo -u ${GIT_USER} ${GIT_HOME}/gitrepo.sh user-set-admin $$gituser true'
+	@sh -c 'printf "Username: "; read gituser; printf "Password: "; stty -echo 2>/dev/null; read -r gitpass; stty echo 2>/dev/null; printf "\n"; gitpass=$$(printf "$$gitpass"|md5sum|cut -d" " -f1); sudo -u ${GIT_USER} ${GIT_HOME}/gitrepo.sh create-user $$gituser $$gitpass; sudo -u ${GIT_USER} ${GIT_HOME}/gitrepo.sh user-set-admin $$gituser true'
 
 .PHONY: all _options clean install _root _githome _webhome _sudo adminuser
