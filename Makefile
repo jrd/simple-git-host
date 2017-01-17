@@ -18,7 +18,7 @@ _options:
 	@echo ""
 
 gen/home:
-	@mkdir -p $@
+	@mkdir -p $@/repos
 
 gen/www/$(WEB_BASE_DIR):
 	@mkdir -p $@
@@ -36,7 +36,7 @@ gen/www/$(WEB_BASE_DIR)config.inc.php:
 	@echo '$$githost = "${GIT_HOSTNAME}";' >> $@
 	@echo '$$gitwebroot = "${WEB_BASE_DIR}";' >> $@
 	@echo '$$gituser = "${GIT_USER}";' >> $@
-	@echo '$$gitdir = "${GIT_HOME}";' >> $@
+	@echo '$$gitdir = "${GIT_HOME}/repos";' >> $@
 	@echo '$$gitwebpath = "${GITWEB_DIR}";' >> $@
 	@echo '?>' >> $@
 

@@ -7,7 +7,7 @@ if ! [ -d .ssh ]; then
   chmod go= .ssh
 fi
 cat /dev/null > .ssh/authorized_keys.tmp
-for f in .keys/*.keys; do
+for f in repos/.keys/*.keys; do
   u=$(basename $f .keys)
   sed "s/^/command=\"check $u\" /" $f >> .ssh/authorized_keys.tmp
 done

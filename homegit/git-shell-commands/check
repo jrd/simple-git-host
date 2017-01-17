@@ -9,22 +9,24 @@ ispublic() {
   [ -e "$1"/git-daemon-export-ok ]
 }
 rungitcmd() {
-  exec /usr/bin/git-shell -c "$SSH_ORIGINAL_COMMAND"
+  exec /usr/bin/git-shell -c "$1"
 }
 error() {
   echo "Error: $1" >&2
   exit 1
 }
 CMD=$(echo "$SSH_ORIGINAL_COMMAND" | cut -d' ' -f1)
-REPO=$(echo "$SSH_ORIGINAL_COMMAND" | cut -d' ' -f2)
+REPO=$(echo "$SSH_ORIGINAL_COMMAND" | sed "s/'//g" | cut -d' ' -f2 | cut -d'/' -f2-)
+REPO_DIR="$HOME/repos/$REPO"
 PUSHCMD="git-receive-pack"
-if [ -d "$REPO" ] && [ -r "$REPO"/.users ]; then
-  if grep -q "^$GITUSER:.*\$" "$REPO"/.users; then
-    RIGHT=$(sed -r -n "/^$GITUSER:/{s/^$GITUSER:(.*)/\1/;p}" "$REPO"/.users)
+SSH_COMMAND=$(echo "$SSH_ORIGINAL_COMMAND" | sed "s|$REPO|$REPO_DIR|")
+if [ -d "$REPO_DIR" ] && [ -r "$REPO_DIR"/.users ]; then
+  if grep -q "^$GITUSER:.*\$" "$REPO_DIR"/.users; then
+    RIGHT=$(sed -r -n "/^$GITUSER:/{s/^$GITUSER:(.*)/\1/;p}" "$REPO_DIR"/.users)
     case $RIGHT in
       admin|user)
         # admin and regular user have the same right on the git repo
-        rungitcmd
+        rungitcmd "$SSH_COMMAND"
         ;;
       readonly)
         if [ "$CMD" = "$PUSHCMD" ]; then
@@ -32,15 +34,15 @@ if [ -d "$REPO" ] && [ -r "$REPO"/.users ]; then
           error "$GITUSER not authorized to push on $REPO"
         else
           # other commands are allowed
-          rungitcmd
+          rungitcmd "$SSH_COMMAND"
         fi
         ;;
       *)
         error "$GITUSER has the unexpected right $RIGHT"
     esac
   else
-    if [ "$CMD" != "$PUSHCMD" ] && [ -e "$REPO"/git-daemon-export-ok ]; then
-      rungitcmd
+    if [ "$CMD" != "$PUSHCMD" ] && ispublic "$REPO_DIR"; then
+      rungitcmd "$SSH_COMMAND"
     else
       # not a member and the command is push or
       # not a member and the repo is not public
@@ -49,5 +51,5 @@ if [ -d "$REPO" ] && [ -r "$REPO"/.users ]; then
   fi
 else
   # will fail as the repo does not exist
-  rungitcmd
+  rungitcmd "$SSH_COMMAND"
 fi
