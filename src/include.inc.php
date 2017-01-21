@@ -56,12 +56,12 @@ function purl($name) {
 }
 
 function gitrepoinfo($params) {
-  global $gituser, $gitdir;
+  global $gituser, $githome;
   $p = '';
   foreach (func_get_args() as $param) {
     $p .= ' ' . escapeshellarg($param);
   }
-  exec("sudo -u $gituser $gitdir/gitrepo.sh $p", $ret, $state);
+  exec("sudo -u $gituser $githome/gitrepo.sh $p", $ret, $state);
   if ($state == 0) {
     return $ret;
   } else {

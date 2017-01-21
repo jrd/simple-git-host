@@ -3,5 +3,6 @@ $title = 'git.myhost.com';
 $githost = 'myhost.com';
 $gitwebroot = '';
 $gituser = 'git';
+$githome = '/home/git';
 $gitdir = '/home/git/repos';
 $gitwebpath = 'gitweb';

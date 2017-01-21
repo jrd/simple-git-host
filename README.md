@@ -7,7 +7,7 @@ Simple, easy web to install a git repositories 'server'.
 |:------- |:----------- |
 | Author  | Cyrille Pontvieux <jrd@enialis.net> |
 | Licence | GPL version 3 (or, at your option, any later version). See [LICENSE](LICENSE) for a full version and this [Quick guide](http://www.gnu.org/licenses/quick-guide-gplv3.html) to understand the licence |
-| Version | __1.0__ |
+| Version | __1.1__ |
 
 Difference with other solutions
 --------------------------------------
