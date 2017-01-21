@@ -1,6 +1,6 @@
 #!/bin/sh
 # vim: et ai cin sw=2 ts=2 tw=0:
-cd ~/
+cd $(dirname "$0")
 
 if ! [ -d .ssh ]; then
   mkdir .ssh
