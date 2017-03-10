@@ -1,0 +1,15 @@
+version: "2"
+volumes:
+  "repos":
+services:
+  git: 
+    build:
+      context: .
+      dockerfile: compose/git.Dockerfile
+    restart: always
+    ports:
+      - "9418:9418"
+      - "80:80"
+      - "22:22"
+    volumes:
+      - "repos:/home/git/repos"
