@@ -107,7 +107,7 @@ create_user() {
   else
     touch .keys/$USERNAME.keys
   fi
-  ./makekeys.sh
+  ~/makekeys.sh
 }
 
 change_user() {
@@ -183,7 +183,7 @@ add_key() {
     exit 2
   fi
   echo "$KEY" >> .keys/$USERNAME.keys
-  ./makekeys.sh
+  ~/makekeys.sh
 }
 
 del_key() {
@@ -205,7 +205,7 @@ del_key() {
   else
     sed -i "/^$KEY\$/d" .keys/$USERNAME.keys
   fi
-  ./makekeys.sh
+  ~/makekeys.sh
 }
 
 destroy_user() {
@@ -219,7 +219,7 @@ destroy_user() {
   for p in ?*.git; do
     [ -e $p/.users ] && sed -i "/^$USERNAME:.*/d" $p/.users
   done
-  ./makekeys.sh
+  ~/makekeys.sh
 }
 
 create_repo() {
